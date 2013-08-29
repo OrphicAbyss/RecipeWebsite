@@ -1,0 +1,270 @@
+@CHARSET "UTF-8";
+
+/* GENERAL LAYOUT */
+html {
+	margin: 0px;
+	padding: 0px;
+	background-image: url('images/darkBackground.png');
+	font-family: 'Quattrocento Sans', sans-serif;
+}
+
+body {
+	margin: 0px;
+}
+
+div.container {
+	margin: 0px;
+	padding: 0px;
+	position: relative;	
+}
+
+div.header {
+	margin: 0px;
+	padding: 0px;
+	background-color: #333333;
+	color: #FCFCFC;
+	margin: 0px;
+	/*font-family: Helvetiva,Arial,sans-serif;*/
+	padding-bottom: 6px;
+	border-bottom: 1px dashed #666666;
+}
+
+div.menu {
+	text-align: right;
+	padding-bottom: 4px;
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.menu div.sel {
+	border-bottom: 1px solid #FFFFFF;
+}
+
+div.menu div.over {
+	background-color: #999999;
+}
+
+div.menu div {
+	padding: 5px;
+	margin-left: -2px;
+	margin-right: -2px;
+	text-decoration: none;
+	font-weight: bold;
+	color: #FFFFFF;
+	display: inline;
+	cursor: pointer;
+	border-left: 2px solid #666666;
+}
+
+div.title {
+	padding-top: 20px;
+	padding-bottom: 20px;
+	/*background-color: #666666;*/
+	background-color: steelblue;
+	border-bottom: 2px solid #000000;
+}
+
+div.title h1 {
+	color: #FFFFFF;/*FF6600;*/
+	text-shadow: #333 2px 2px 2px;
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.content {
+	max-width: 780px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
+	min-height: 550px;
+	border-bottom-left-radius: 15px;
+	border-bottom-right-radius: 15px;
+	word-wrap: break-word;
+	background-color: #FFFFFF;
+	/*background-image: url("images/stripe_background.png");*/
+	background-position: center;
+	background-repeat: repeat;
+}
+
+div.wait {
+	position:fixed;
+	
+	left:0; top:0; right:0; bottom:0; 
+	margin: auto;
+	padding: 10px;
+	width: 200px;
+	height: 20px;
+	
+	border: 1px solid #000000;
+	border-radius: 25px;
+	
+	color: #000000;
+	text-shadow: #CCCCCC 2px 2px 2px;
+	
+	font-weight: bold;
+	font-size: large;
+	/*font-family: Helvetiva,Arial,sans-serif;*/
+	
+	background-color: #FFFFFF;
+	/*opacity:0.4;
+	filter:alpha(opacity=40);*/
+}
+
+div.maxwidth {
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.loginBox {
+	float: right;
+	background-color: dimgrey;
+	border: 1px solid black;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.hide {
+	display: none;
+}
+
+p, h1 {
+	margin-top: 0px;
+}
+
+h1 {
+	margin-bottom: 0.1em;
+	font-family: 'Quattrocento Sans', serif;
+	font-weight: normal;
+}
+
+div.link {
+	color: black;
+	cursor: pointer;
+}
+
+a {
+	color: black;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+div.link:hover ,
+a:hover {
+	color: dimgrey;
+}
+	
+a:visited {
+	color: auto;
+}
+
+/* FORM LAYOUT */
+label {
+	font-weight: bold;
+	font-size: 1.2em;
+	/*font-family: Helvetiva,Arial,sans-serif;*/
+	display: block;
+}
+
+textarea {
+	font-size: 1.2em;
+	/*font-family: Helvetiva,Arial,sans-serif;*/
+	width: 100%;
+	box-sizing: border-box;
+	padding-top: 0.4em;
+	padding-bottom: 0.4em;
+	border-radius: 5px;
+	border-style: inset;
+	border-width: 2px;
+}
+
+input {
+	font-size: 1.2em;
+	/*font-family: Helvetiva,Arial,sans-serif;*/
+	border-radius: 5px;
+	border-style: inset;
+	border-width: 2px;
+}
+
+input[type="button"] {
+	font-weight: bold;
+}
+
+form {
+	position: relative;
+	display: block;
+	margin: 5px;
+	padding: 5px;
+	border: 1px dotted #333333;
+}
+
+/* LIST LAYOUT */
+table {
+	border: 1px dotted #333333;
+}
+
+table td {
+	border: 1px solid transparent;
+	padding: 4px;
+	vertical-align: top;
+}
+
+td.header-cell {
+	border: 1px solid #000000;
+	background-color: #CCCCCC;
+}
+
+td.header-cell, h2 {
+	font-family: 'Quattrocento Sans',serif;
+	font-weight: normal;
+	margin-bottom: 0px;
+	color: steelblue;
+}
+
+td.data-cell, div.data-cell {
+
+}
+
+tr.data-row {
+    background-color: #EAEAEA;
+}
+
+tr.data-row.alt {
+	background-color: #DDDDDD;
+	/*background-image: url("images/stripe_backgroundRev.png");*/
+	background-position: center;
+	background-repeat: repeat;
+}
+
+tr.data-row.over, tr.data-row.alt.over {
+	background-image: none;
+	background-color: #CCCCDD;
+	cursor: pointer;
+}
+
+tr.data-row.over td, tr.data-row.alt.over td {
+	border: 1px dashed #666666;
+}
+
+/* JQuery UI CSS */
+div.ui-widget-overlay {
+	opacity: 0.5;
+	background: black;
+}
+	
+.ui-dialog .ui-dialog-titlebar {
+	padding: 0.2em;
+}
+	
+div.ui-widget-header {
+	font-weight: normal;
+	font-size: 1.5em;
+}
+
+.ui-dialog div.ui-dialog-content {
+	padding: 0.25em;
+}
