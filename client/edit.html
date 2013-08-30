@@ -1,0 +1,29 @@
+<div>
+    <form class="">
+        <input type="hidden" name="ID" />
+        <input type="hidden" name="Version" />
+        <label for="Title">Title</label>
+        <textarea class="form-control" id="Title" name="Title" rows=1></textarea><br/>
+        <label for="Description">Description (optional)</label>
+        <textarea class="form-control" id="Description" name="Description" rows=10></textarea><br/>
+        <label for="Ingredients">Ingredients</label>
+        <textarea class="form-control" id="Ingredients" name="Ingredients" rows=10></textarea><br/>
+        <label for="Method">Method</label>
+        <textarea class="form-control" id="Method" name="Method" rows=10></textarea><br/>
+        <label for="Notes">Notes (optional)</label>
+        <textarea class="form-control" id="Notes" name="Notes" rows=10></textarea><br />
+        <label for="Source">Source (optional)</label>
+        <textarea class="form-control" id="Source" name="Source" rows = 1></textarea><br/>
+        <label for="Tags">Tags</label>
+        <input type="text" id="Tags" name="Tags" /><br/>
+        <label for="Visibility">Visibility</label>
+        <select id="Visibility" name="Visibility">
+            <option value="0" selected>Private</option>
+            <option value="1">Link Share</option>
+            <option value="2">Public</option>					 	
+        </select><br/>
+        <input type="hidden" id="Cmd" name="Cmd" value="SaveRecipe"/>
+        <button type="button" class="btn btn-primary">Save</button>
+        <button type="button" class="btn">Cancel</button>
+    </form>
+</div>
