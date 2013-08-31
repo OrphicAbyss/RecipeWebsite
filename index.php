@@ -22,10 +22,6 @@ if (!isset($_SESSION['loggedin'])) {
         <link rel="stylesheet" href="superbly-tagfield/superbly-tagfield.css" />
         <script type="text/javascript" src="superbly-tagfield/superbly-tagfield.min.js"></script>
 
-        <!-- Load jQuery UI -->
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"></script>
-        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/themes/base/jquery-ui.css" type="text/css" media="all" />
-
         <!-- Load stacktrack js library -->
         <script type="text/javascript" src="stacktrace-0.3.js"></script>
 
@@ -34,12 +30,10 @@ if (!isset($_SESSION['loggedin'])) {
         <!-- Load tooltip js library -->
         <script type="text/javascript" src="jquery-tooltip/jquery.tooltip.min.js"></script>
         <link rel="stylesheet" href="jquery-tooltip/jquery.tooltip.css" type="text/css"></link>
-        <!-- Load dialog js library -->
-        <script type="text/javascript" src="dialog.js"></script>
-        <!-- Load recipe js library -->
-        <script type="text/javascript" src="recipe.js"></script>
-        <!-- Load debug util library -->
-        <script type="text/javascript" src="util.js"></script>
+        <!--         Load recipe js library 
+                <script type="text/javascript" src="recipe.js"></script>
+                 Load debug util library 
+                <script type="text/javascript" src="util.js"></script>-->
 
         <!-- Piwik -->
         <script type="text/javascript" src="../piwik/piwik.js"></script>
@@ -62,103 +56,28 @@ if (!isset($_SESSION['loggedin'])) {
             @import "recipe.css";
         </style>
         <script type="text/javascript">
-            var urlPage = "";
-            var urlParamsFull = "";
-            var urlParams = {};
-            function handleUrlParams() {
-                urlPage = "";
-                urlParamsFull = "";
-                urlParams = {};
-                var e;
-                var a = /\+/g;  // Regex for replacing addition symbol with a space
-                var r = /([^&=]+)=?([^&]*)/g;
-                var d = function(s) {
-                    return decodeURIComponent(s.replace(a, " "));
-                };
-                var q = window.location.hash.substring(1);
-
-                if (q.indexOf("/") != -1) {
-                    urlPage = q.substring(0, q.indexOf("/"));
-                    urlParamsFull = q.substring(q.indexOf("/") + 1);
-                    q = urlParamsFull;
-                }
-
-                while (null != (e = r.exec(q))) {
-                    urlParams[d(e[1])] = d(e[2]);
-                }
-            }
-            handleUrlParams();
-
             $(document).ready(function() {
-                // Setup the dialog window
-                $.setDialogWindow($("#dialog"));
-                // Event listener for the forms
-                $("form").submit(handleForm);
-                // Handle events from a tag buttons
-                //$("a[data-dialog!='']").click(function (){
-                //$.showDialog($(this).attr("data-dialog"));
-                //});
-
-                window.ignoreHashChange = false;
-
-                window.updateHash = function(newHash) {
-                    if (newHash.substring(0, 1) != "#") {
-                        newHash = "#" + newHash;
-                    }
-                    if (window.location.hash != newHash) {
-                        window.ignoreHashChange = true;
-                        window.location.hash = newHash;
-                    }
-                };
-
                 window.onhashchange = function() {
-                    if (!window.ignoreHashChange) {
-                        handleUrlParams();
-                        if (urlPage == "") {
-                            urlPage = "home";
-                        }
-                        var pageObj = $("div.navbar button[data-content-id='" + urlPage + "']");
-                        if (pageObj.length > 0) {
-                            pageObj.trigger("click");
-                        } else {
-                            loadPageAjax("Cmd=" + urlPage + "&" + urlParamsFull);
-                        }
-                    }
-                    window.ignoreHashChange = false;
+//                    if (!window.ignoreHashChange) {
+//                        handleUrlParams();
+//                        if (urlPage == "") {
+//                            urlPage = "home";
+//                        }
+//                        var pageObj = $("div.navbar button[data-content-id='" + urlPage + "']");
+//                        if (pageObj.length > 0) {
+//                            pageObj.trigger("click");
+//                        } else {
+//                            loadPageAjax("Cmd=" + urlPage + "&" + urlParamsFull);
+//                        }
+//                    }
+//                    window.ignoreHashChange = false;
 
-                    //track in piwik
-                    piwikTracker.setCustomUrl(window.location.href);
-                    piwikTracker.setDocumentTitle(document.title);
-                    piwikTracker.trackPageView();
+//                    //track in piwik
+//                    piwikTracker.setCustomUrl(window.location.href);
+//                    piwikTracker.setDocumentTitle(document.title);
+//                    piwikTracker.trackPageView();
                 };
-
-
-                /* MENU BAR EVENTS */
-                var menu = $("div.navbar button");
-                menu.bind('click', menuTriggerFunc);
-
-                var searchInputs = $("input[name='search-type']");
-                searchInputs.click(function() {
-                    loadPageAjax("Cmd=search&" + $(this).val() + "=true");
-                });
-
-                if ("confirm" in urlParams) {
-                    window.location.hash = "#";
-                    loadPageAjax("Cmd=Confirm&confirm=" + urlParams["confirm"] + "&username=" + urlParams["username"]);
-                    handleUrlParams();
-                }
-
-                if (urlPage != "") {
-                    var pageObj = $("div.menu div[data-content-id='" + urlPage + "']");
-                    if (pageObj.length > 0) {
-                        pageObj.trigger("click");
-                    } else {
-                        loadPageAjax("Cmd=" + urlPage + "&" + urlParamsFull);
-                    }
-                } else {
-                    loadPageAjax("Cmd=search");
-                }
-            });
+            }
         </script>
 
         <!-- Latest compiled and minified CSS -->
@@ -170,47 +89,64 @@ if (!isset($_SESSION['loggedin'])) {
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
         <script src="client/controller.js"></script>
     </head>
-    <body>
+    <body data-ng-controller="PageCtrl">
         <div class="navbar">
             <div class="container">
                 <div class="navbar-nav">
-                    <div class="navbar-brand">Gastronomy Taxonomy</div>
+                    <a class="navbar-brand">Gastronomy Taxonomy</a>
                 </div>
-                <div class="navbar-nav pull-right">            
-                    <!--<div id="butHome" data-content-id="home" class="sel">Home</div>-->
-                    <?php if ($_SESSION['loggedin'] == true) { ?>
-                        <button id="butFind" type="button" data-content-id="search" data-cmd="search" class="btn navbar-btn">Find a recipe</button>
-                        <button id="butAdd" type="button" data-content-id="add" class="btn navbar-btn">Add a recipe</button>
-                        <button id="butProfile" type="button" data-content-id="profile" class="btn navbar-btn">Profile</button>
-                        <?php if ($_SESSION['isadmin'] == true) { ?>
-                            <button id="butAdmin" type="button" data-cmd="admin" class="btn navbar-btn">Admin</button>
-                        <?php } ?>
-                        <button id="butLogout" type="button" data-cmd="Logout" class="btn navbar-btn">Sign out</button>
-                    <?php } else { ?>
-                        <button id="butLogin" type="button" class="btn btn-default navbar-btn">Sign in</button>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#search">Find a recipe</a></li>
+                    <li data-ng-show="loggedIn"><a href="#add">Add a recipe</a></li>
+                    <li data-ng-show="loggedIn"><a href="#profile">Profile</a></li>
+                    <?php if ($_SESSION['isadmin'] == true) { ?>
+                        <li data-ng-show="loggedIn"><a href="#admin">Admin</a></li>
                     <?php } ?>
-                </div>
+                    <li data-ng-show="loggedIn"><a data-ng-click="signout()">Sign out</a></li>
+                    <li data-ng-show="!loggedIn"><a data-ng-click="signin()">Sign in</a></li>
+                </ul>
             </div>
         </div>
         <div class="container">
             <div id="loginBox" class="loginBox hide">
-                <form name="login" target="autocomp" method="post" action="login.html">
-                    <label for="user">Username:</label>
-                    <input type="text" id="user" class="form-control" name="user" />
-                    <label for="pass">Password:</label>
-                    <input type="password" id="pass" class="form-control" name="pass" /><br />
-                    <input type="hidden" id="Cmd" name="Cmd" value="Login" /> 
-                    <input id="btnLogin" value="Login" type="submit" />
-                    <a data-dialog="frmReg" style="font-size: small">Not registered?</a>
-                    <a data-dialog="frmReset" style="font-size: small">Forgotten Password?</a>
-                </form>
-                <div id="response" style="color: red"></div>
-                <iframe name="autocomp" style="display: none"></iframe>
+                <div class="well">
+                    <div id="loginAlert"></div>
+                    <form name="login" target="autocomp" method="post" action="login.html">
+                        <label for="user">Username:</label>
+                        <input type="text" id="user" name="user" class="form-control" data-ng-model="username"/>
+                        <label for="pass">Password:</label>
+                        <input type="password" id="pass" name="pass" class="form-control" data-ng-model="password"/>
+                        <button type="button" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
+                        <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
+                        <a data-dialog="frmReg" style="font-size: small">Not registered?</a>
+                        <a data-dialog="frmReset" style="font-size: small">Forgotten Password?</a>
+                    </form>
+                    <div id="response" style="color: red"></div>
+                    <iframe name="autocomp" style="display: none"></iframe>
+                </div>
+            </div>
+        </div>
+        <div>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title"></h4>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="container">
             <div data-ng-view>
-                <p>Replace me</p>
+                <p>Broken view controller</p>
             </div>
         </div>
         <div class="container">
@@ -234,79 +170,9 @@ if (!isset($_SESSION['loggedin'])) {
                         <input type="submit" value="find"/>
                     </form>
                 </div>
-                <div class="page" id="list-recipe" data-button-id="butFind">
-                    <div style="display: inline">
-                        <label style="display: inline" for="input-public">Public:</label>
-                        <input type="radio" id="input-public" name="search-type" value="Public">
-                        <?php if ($_SESSION['loggedin'] == true) { ?>
-                            <label style="display: inline" for="input-private">Private:</label>
-                            <input type="radio" id="input-private" name="search-type" value="Private">
-                        <?php } ?>
-                    </div>
-                    <div style='float: right'>
-                        <label style='display: inline' for='input-search'>Search:</label>
-                        <input type='text' id='input-search' name='input-search' onkeyup='javascript:onChangeSearch("#recipe-list", this.value);'>
-                    </div>
-                    <table id="recipe-list" style="clear: right; width: 100%;">
-                    </table>
-                </div>
                 <div class="page hide" id="list">
                 </div>
                 <div class="page hide" id="item" style="margin-left: 30px; border-left: 1px dashed red; padding-left: 30px; padding-right: 30px;">
-                </div>
-                <div class="page hide" id="add" data-button-id="add">
-                    <form>
-                        <label for="Title">Title</label>
-                        <textarea id="Title" name="Title" rows=1></textarea><br />
-                        <label for="Description">Description (optional)</label>
-                        <textarea id="Description" name="Description" rows=10></textarea><br />
-                        <label for="Ingredients">Ingredients</label>
-                        <textarea id="Ingredients" name="Ingredients" rows=10></textarea><br />
-                        <label for="Method">Method</label>
-                        <textarea id="Method" name="Method" rows=10></textarea><br />
-                        <label for="Notes">Notes (optional)</label>
-                        <textarea id="Notes" name="Notes" rows=10></textarea><br />
-                        <label for="Source">Source (optional)</label>
-                        <textarea id="Source" name="Source" rows = 1></textarea><br />
-                        <label for="Tags">Tags</label>
-                        <input type="text" id="Tags" name="Tags" /><br/>
-                        <label for="Visibility">Visibility</label>
-                        <select id="Visibility" name="Visibility">
-                            <option value="0" selected>Private</option>
-                            <option value="1">Link Share</option>
-                            <option value="2">Public</option>					 	
-                        </select><br/>
-                        <input type="hidden" id="Cmd" name="Cmd" value="SaveRecipe"/>
-                        <input name="btnSave" value="Save" type="submit"/>
-                    </form>
-                </div>
-                <div class="page hide" id="edit">
-                    <form>
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="Version" />
-                        <label for="Title">Title</label>
-                        <textarea id="Title" name="Title" rows=1></textarea><br/>
-                        <label for="Description">Description (optional)</label>
-                        <textarea id="Description" name="Description" rows=10></textarea><br/>
-                        <label for="Ingredients">Ingredients</label>
-                        <textarea id="Ingredients" name="Ingredients" rows=10></textarea><br/>
-                        <label for="Method">Method</label>
-                        <textarea id="Method" name="Method" rows=10></textarea><br/>
-                        <label for="Notes">Notes (optional)</label>
-                        <textarea id="Notes" name="Notes" rows=10></textarea><br />
-                        <label for="Source">Source (optional)</label>
-                        <textarea id="Source" name="Source" rows = 1></textarea><br/>
-                        <label for="Tags">Tags</label>
-                        <input type="text" id="Tags" name="Tags" /><br/>
-                        <label for="Visibility">Visibility</label>
-                        <select id="Visibility" name="Visibility">
-                            <option value="0" selected>Private</option>
-                            <option value="1">Link Share</option>
-                            <option value="2">Public</option>					 	
-                        </select><br/>
-                        <input type="hidden" id="Cmd" name="Cmd" value="SaveRecipe"/>
-                        <input name="btnSave" value="Save" type="submit"/>
-                    </form>
                 </div>
                 <div class="page hide" id="image">
                     <form name="form" action="" method="POST" enctype="multipart/form-data">
@@ -322,22 +188,6 @@ if (!isset($_SESSION['loggedin'])) {
                         <input id="fileToUpload" name="fileToUpload" type="file" size="45"/><br/>
                         <button class="button" id="buttonUpload" onclick="javascript: return ajaxFileUpload($('#image form'));">Upload</button>
                     </form>
-                </div>
-                <div class="page hide" id="profile" data-button-id="profile">
-                    <form>
-                        <label for="pass">Current Password</label>
-                        <input type="password" id="pass" name="pass" /><br />
-                        <label for="newPass">New Password</label>
-                        <input type="password" id="newPass" name="newPass" /><br />
-                        <label for="confNewPass">Confirm New Password</label>
-                        <input type="password" id="confNewPass" name="confNewPass" /><br />
-                        <input type="hidden" id="Cmd" name="Cmd" value="UpdatePassword"/>
-                        <input name="btnSave" value="Save" type="submit"/>
-                    </form>
-                </div>
-                <div class="page hide" id="admin">
-                </div>
-                <div class="page hide" id="ajax">
                 </div>
                 <div class="hide" id="dialog">
                     <div id="frmReg" data-title="Register Account">

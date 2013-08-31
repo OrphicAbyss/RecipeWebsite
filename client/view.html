@@ -1,0 +1,51 @@
+<div>
+    <h1 style='float: left'>
+        {{recipe.Title}}
+        <img src='icons/{{recipe.Visibility.toLowerCase()}}.png' alt='{{recipe.Visibility}}' style='padding-left: 0.5em'/>
+    </h1>
+    <div style='float: right'>
+        <div style='text-align: right; margin-bottom: 1em;'>
+            <h2 style='margin: 0px'>Tags</h2>
+            <ul>
+                <li data-ng-repeat="tag in recipe.Tags">{{tag.Tag}}</li>
+            </ul>
+        </div>
+        <img data-ng-repeat="image in recipe.Images" style='width: 200px; margin-bottom: 1em; float: right; clear: right; border: 1px solid black' src='images/{{image.FilenameServer}}'/>
+    </div>
+    <div style='clear: left'></div>
+    <div>
+        <h4>Author</h4>
+        <div>{{recipe.Author.Name}}</div>
+    </div>
+    <div>
+        <h2>Description</h2>
+        <p data-ng-repeat="line in recipe.Description">{{line}}</p>
+    </div>
+    <div>
+        <h2>Ingredients</h2>
+        <ul>
+            <li data-ng-repeat="line in recipe.Ingredients">{{line}}</li>
+        </ul>
+    </div>
+    <div>
+        <h2>Method</h2>
+        <p data-ng-repeat="line in recipe.Method">{{line}}</p>
+    </div>
+    <div>
+        <h2>Notes</h2>
+        <p data-ng-repeat="line in recipe.Notes">{{line}}</p>
+    </div>
+    <div>
+        <h2>Source</h2>
+        <div>{{recipe.Source}}</div>
+    </div>
+</div>
+<!--   if ((drillDownCmds != undefined && drillDownId != undefined) && drillDownCmds.length > 0) {
+        html += "<div style='padding-top: 2em'><h2 class='header-cell'>Actions</h2><div class='data-cell'>";
+        for (var drillDownKey in drillDownCmds) {
+            html += '<div class="link" data-cmd="Cmd=' + drillDownCmds[drillDownKey]['cmd'] + '&ID=' + drillDownId + '">' + drillDownCmds[drillDownKey]['text'] + '</div>';
+        }
+        html += "</div></div>"
+    }
+    html += '<div style="clear: right"></div>'
+    return html;-->

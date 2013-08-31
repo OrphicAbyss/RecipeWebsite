@@ -20,7 +20,7 @@
         </thead>
         <tbody>
             <tr class="" data-cmd="view" data-id="{{recipe.id}}" data-ng-repeat="recipe in recipes">
-                <td><a href="#view/ID={{recipe.ID}}">{{recipe.Title}}</a></td>
+                <td><a href="#view/{{recipe.ID}}">{{recipe.Title}}</a></td>
                 <td>{{recipe.Description}}</td>
                 <td>{{recipe.Author.Name}}</td>
                 <td><div data-ng-repeat="tag in recipe.Tags">{{tag.Tag}}</div></td>
