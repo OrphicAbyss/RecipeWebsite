@@ -294,14 +294,17 @@ if ($_SESSION['loggedin'] != true) {
             $ID = mysql_real_escape_string($_POST['ID'], getConnection());
 
             $recipe = Recipe::find($ID);
+            $data = array();
+            $data['Error'] = false;
             if ($recipe == null) {
-                $returnMsg->returnError("Unable to find the recipe you wanted.");
+                $data['Error'] = true;
+                $data['Message'] = "Unable to find the recipe you wanted.";
             } else {
                 $recipe->populateTags();
-                $returnMsg->setMsgType(AjaxMessage::TYPE_EDIT);
-                $returnMsg->setData($recipe);
-                $returnMsg->setURL("edit/ID=" . $_POST['ID']);
+                $data['Recipe'] = $recipe;
             }
+            echo json_encode($data);
+            $returnMsg->setIgnore(true);
             break;
 
         case 'GetTags':

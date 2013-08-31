@@ -54,30 +54,45 @@ if (!isset($_SESSION['loggedin'])) {
         <!-- Import our css -->
         <style type="text/css">
             @import "recipe.css";
+
+            .tag-input {
+                margin-top: -1px;
+                width: 100%;
+                border: none;
+                outline: none;
+                color: #555;
+            }
+
+            .tag {
+                -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,0.15),0 1px 1px rgba(0,0,0,0.075);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.15),0 1px 1px rgba(0,0,0,0.075);
+                border: 1px solid #ccc;
+                background-color: #eee;
+                border-radius: 4px;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            .tag-control {
+                height: auto;
+            }
+
+            .tag-control.focus {
+                border-color: #66afe9;
+                outline: 0;
+                -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);
+                box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);
+            }
         </style>
         <script type="text/javascript">
-            $(document).ready(function() {
-                window.onhashchange = function() {
-//                    if (!window.ignoreHashChange) {
-//                        handleUrlParams();
-//                        if (urlPage == "") {
-//                            urlPage = "home";
-//                        }
-//                        var pageObj = $("div.navbar button[data-content-id='" + urlPage + "']");
-//                        if (pageObj.length > 0) {
-//                            pageObj.trigger("click");
-//                        } else {
-//                            loadPageAjax("Cmd=" + urlPage + "&" + urlParamsFull);
-//                        }
-//                    }
-//                    window.ignoreHashChange = false;
-
+//            $(document).ready(function() {
+//                window.onhashchange = function() {
 //                    //track in piwik
 //                    piwikTracker.setCustomUrl(window.location.href);
 //                    piwikTracker.setDocumentTitle(document.title);
 //                    piwikTracker.trackPageView();
-                };
-            }
+//                };
+//            }
         </script>
 
         <!-- Latest compiled and minified CSS -->
