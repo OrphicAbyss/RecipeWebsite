@@ -27,93 +27,7 @@ function getSearchURL() {
 
 // Handle searching and viewing - These aren't dependant on if we are logged in or not
 switch ($_POST['Cmd']) {
-    case 'search':
-        $return = array();
-        $recipes = null;
 
-        if ((isset($_POST['All']) || isset($_POST['Deleted'])) && $_SESSION['isadmin']) {
-            //All or Deleted records are returned
-            $recipes = isset($_POST['All']) ? Recipe::findAll() : Recipe::findAllDeleted();
-        } else if (isset($_POST['Public']) || !isset($_SESSION['userid']) || $_SESSION['userid'] == "") {
-            //All public records are returned
-            $recipes = Recipe::findAllPublic();
-            $return['Type'] = "Public";
-        } else {
-            //All of the current users records returned
-            $recipes = Recipe::findAllWithUser($_SESSION['userid']);
-            $return['Type'] = "Private";
-        }
-
-        if ($recipes != null) {
-            // Remove unneeded data
-            foreach ($recipes as $recipe) {
-                unset($recipe->Hash);
-                unset($recipe->Ingredients);
-                unset($recipe->Method);
-                unset($recipe->Notes);
-                unset($recipe->Source);
-
-                $recipe->populateTags();
-                $recipe->populateImages();
-                $recipe->populateAuthor();
-                $recipe->Deleted = ($recipe->Deleted == 1 ? "True" : "False");
-                $recipe->Visibility = RecipeDB::visibilityCodeToString($recipe->Visibility);
-
-                $recipe->Author->cleanForClientSide();
-                unset($recipe->AuthorID);
-            }
-
-            $return['Recipes'] = $recipes;
-            $returnMsg->setMsgType(AjaxMessage::TYPE_LIST_RECIPE);
-            $returnMsg->setData($return);
-            $returnMsg->setURL(getSearchURL());
-        } else {
-            $returnMsg->returnError("Search returned no results.");
-        }
-        break;
-
-    case 'view':
-        $ID = mysql_real_escape_string($_POST['ID'], getConnection());
-        $Hash = mysql_real_escape_string($_POST['Hash'], getConnection());
-
-        $recipe = Recipe::findByHashOrId($ID, $Hash);
-        $rtnUrl = "view/" . Recipe::createHashOrIdString($_POST['ID'], $_POST['Hash']);
-
-        $data = array();
-        $data['Error'] = false;
-        if ($recipe == null) {
-            $data['Error'] = true;
-            $data['Message'] = "Unable to find the recipe you wanted.";
-        } else {
-            //we have a recipe are we allowed to view it
-            if ($_SESSION['isadmin'] || // we can if we are an admin
-                    ($recipe->Visibility == 0 && $_SESSION['userid'] == $recipe->AuthorID) || // we can if it is our recipe
-                    $recipe->Visibility > 0) {             // we can if the recipe is shared
-                $Hash = $recipe->Hash;
-                $ID = $recipe->ID;
-
-                $recipe->populateAuthor();
-                $recipe->populateTags();
-                $recipe->populateImages();
-
-                if ($recipe->AuthorID == $_SESSION['userid']) {
-                    // If it is the current users recipe, allow them to edit it
-                    $recipe->DataCmd = array(array("cmd" => "edit", "text" => "Edit recipe"), array("cmd" => "delete", "text" => "Delete recipe"), array("cmd" => "image", "text" => "Manage recipe images"));
-                    $recipe->DataId = $ID;
-                }
-
-                $recipe->cleanForClientSide();
-
-                // TODO: Switch to using hashes to identify recipes
-                $data['Recipe'] = $recipe;
-            } else {
-                $data['Error'] = true;
-                $data['Message'] = "You are not allowed to view this recipe. It has not been shared.";
-            }
-        }
-        echo json_encode($data);
-        $returnMsg->setIgnore(true);
-        break;
     case 'amLoggedIn':
         if ($_SESSION['loggedin'])
             echo '{"loggedIn": true}';
@@ -127,36 +41,6 @@ switch ($_POST['Cmd']) {
 // If we aren't logged in we can: Login, Register, Reset Password or Confirm an account
 if ($_SESSION['loggedin'] != true) {
     switch ($_POST['Cmd']) {
-        case 'Login':
-            // Setup the response as if we failed to log in, if we login we will replace this message
-            $data = array();
-            $data['Message'] = "Username or Password incorrect or Account has not been confirmed.";
-
-            $name = mysql_real_escape_string($_POST['user'], getConnection());
-            $user = User::findByName($name);
-            if ($user != null) {
-                if (strcmp($user->Confirmation, "") != 0) {
-                    $data['Message'] = "Account has not been confirmed. Check your email inbox and your spam folder for the confirmation email.";
-                } else {
-                    $hash = sha1($_POST['pass'] . $user->Salt);
-                    if (strcmp($user->Pass, $hash) == 0) {
-                        // TODO: save the user class instance into the session variables instead
-                        $_SESSION['loggedin'] = true;
-                        $_SESSION['userid'] = $user->ID;
-                        $_SESSION['username'] = $user->Name;
-                        $_SESSION['isadmin'] = $user->Admin;
-                        
-                        $data['Message'] = "";
-                    }
-                }
-            }
-            
-            $data['loggedIn'] = $_SESSION['loggedin'];
-            $data['Error'] = !$_SESSION['loggedin'];
-            echo json_encode($data);
-            $returnMsg->setIgnore(true);//setData($data);
-            break;
-
         case 'ResetPass':
             $email = mysql_real_escape_string($_POST['Email'], getConnection());
             $user = User::findByEmail($email);
@@ -227,36 +111,6 @@ if ($_SESSION['loggedin'] != true) {
     // If we are logged in we can: Log out, Update our password, Save a recipe, edit a recipe, delete a recipe, upload an image, delete an image (not yet done), Or do some admin functions if we have permissions
 } else {
     switch ($_POST['Cmd']) {
-        case 'Logout':
-            $_SESSION['loggedin'] = false;
-            $_SESSION['userid'] = null;
-            $_SESSION['username'] = null;
-            $_SESSION['isadmin'] = null;
-
-            echo '{"loggedIn": false}';
-            $returnMsg->setIgnore(true);
-            break;
-
-        case 'UpdatePassword':
-            $user = User::find($_SESSION['userid']);
-            if ($user == null) {
-                $returnMsg->returnError("Error changing password could not find user.");
-            } else {
-                if ($_POST['newPass'] != $_POST['confNewPass']) {
-                    $returnMsg->returnError("New password and Confirmation of new password are not the same. Please retype the passwords and try again.");
-                } else {
-                    $hash = $user->hashPass($_POST['pass']);
-                    if ($hash != $user->Pass) {
-                        $returnMsg->returnError("Current password provided is not correct. Please retype the current password and try again.");
-                    } else {
-                        $user->Salt = mysql_real_escape_string(sha1(time()), getConnection());
-                        $user->Pass = mysql_real_escape_string($user->hashPass($_POST['newPass']), getConnection());
-                        $user->save();
-                        $returnMsg->returnMessage("Your password has been updated.");
-                    }
-                }
-            }
-            break;
 
         case 'SaveRecipe':
             $recipeToSave = new Recipe();

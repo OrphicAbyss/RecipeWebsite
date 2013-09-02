@@ -20,7 +20,7 @@
                 <li data-ng-repeat="(key,tag) in recipe.Tags">
                     <div class="tag">{{tag}}&nbsp;<button data-ng-click="deleteTag(key)" type="button" class="close" aria-hidden="true">&times;</button></div>
                 </li>
-                <li><input data-ng-model="tagText" data-tag-input="" data-new-tag="addTag" data-delete-tag="deleteTag" type="text" id="Tags" name="Tags" class="tag-input"/></li>
+                <li><input data-ng-model="tagText" data-tag-input="recipe.Tags" type="text" id="Tags" name="Tags" class="tag-input"/></li>
             </ul>
         </div>
         <label for="Visibility">Visibility</label>
@@ -29,9 +29,9 @@
             <option value="1">Link Share</option>
             <option value="2">Public</option>					 	
         </select>
-        <input type="hidden" id="Cmd" name="Cmd" value="SaveRecipe"/>
         <br/>
-        <button type="button" class="btn btn-primary">Save</button>
-        <button type="button" class="btn">Cancel</button>
+        <button data-ng-click="save()" type="button" class="btn btn-primary">Save</button>
+        <button data-ng-click="cancel()" type="button" class="btn btn-default">Cancel</button>
     </form>
+    <br/>
 </div>

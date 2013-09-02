@@ -1,15 +1,20 @@
 <div>
-    <div style="display: inline">
+    <div class="col-lg-6">
         <label style="display: inline" for="input-public">Public:</label>
         <input type="radio" id="input-public" name="search-type" value="Public">
         <label style="display: inline" for="input-private">Private:</label>
         <input type="radio" id="input-private" name="search-type" value="Private">
     </div>
-    <div style="float: right">
-        <label style="display: inline" for="input-search">Search:</label>
-        <input type="text" id="input-search" name="input-search" onkeyup="javascript: onChangeSearch('#recipe - list', this.value);"/>
+    <div class="col-lg-6">
+        <div class="input-group">
+            <span class="input-group-addon">Search:</span>
+            <input class="form-control" type="text" name="input-search" data-ng-model="search"/>
+            <span class="input-group-btn">
+                <button data-ng-click="clearSearch()" class="btn btn-default">Clear</button>
+            </span>
+        </div>
     </div>
-    <table class="table table-hover table-striped" style="clear: right; width: 100%;">
+    <table class="table table-hover table-striped table-responsive" style="clear: right; width: 100%;">
         <thead>
             <tr class="">
                 <th>Title</th>
@@ -19,11 +24,17 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="" data-cmd="view" data-id="{{recipe.id}}" data-ng-repeat="recipe in recipes">
-                <td><a href="#view/{{recipe.ID}}">{{recipe.Title}}</a></td>
+            <tr class="" data-cmd="view" data-id="{{recipe.id}}" data-ng-repeat="recipe in recipes | filter: search">
+                <td><a href="#/view/{{recipe.ID}}">{{recipe.Title}}</a></td>
                 <td>{{recipe.Description}}</td>
                 <td>{{recipe.Author.Name}}</td>
-                <td><div data-ng-repeat="tag in recipe.Tags">{{tag.Tag}}</div></td>
+                <td>
+                    <ul class="list-inline">
+                        <li data-ng-repeat="tag in recipe.Tags">
+                            <button data-ng-click="tagSearch(tag.Tag)" class="btn btn-default btn-xs">{{tag.Tag}}</button>
+                        </li>
+                    </ul>
+                </td>
             </tr>
         </tbody>
     </table>

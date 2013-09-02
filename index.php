@@ -13,27 +13,13 @@ if (!isset($_SESSION['loggedin'])) {
     <head>
         <title>Recipe Notebook</title>
         <!-- Load jQuery Library -->
-        <!--script type="text/javascript" src="jquery/jquery-1.6.1.js"></script-->
-        <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>-->
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-
-        <!-- Load jQuery Plugins -->
-        <script type="text/javascript" src="jquery/jquery.linkify-1.0-min.js"></script>
-        <link rel="stylesheet" href="superbly-tagfield/superbly-tagfield.css" />
-        <script type="text/javascript" src="superbly-tagfield/superbly-tagfield.min.js"></script>
 
         <!-- Load stacktrack js library -->
         <script type="text/javascript" src="stacktrace-0.3.js"></script>
 
         <!-- Load ajaxFileUpload library -->
         <script type="text/javascript" src="ajaxfileupload.js"></script>
-        <!-- Load tooltip js library -->
-        <script type="text/javascript" src="jquery-tooltip/jquery.tooltip.min.js"></script>
-        <link rel="stylesheet" href="jquery-tooltip/jquery.tooltip.css" type="text/css"></link>
-        <!--         Load recipe js library 
-                <script type="text/javascript" src="recipe.js"></script>
-                 Load debug util library 
-                <script type="text/javascript" src="util.js"></script>-->
 
         <!-- Piwik -->
         <script type="text/javascript" src="../piwik/piwik.js"></script>
@@ -48,12 +34,9 @@ if (!isset($_SESSION['loggedin'])) {
         </script>
         <!-- End Piwik Tracking Code -->
 
-        <!-- Import fonts -->
-        <link href='http://fonts.googleapis.com/css?family=PT+Serif+Caption' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Quattrocento+Sans' rel='stylesheet' type='text/css'>
         <!-- Import our css -->
         <style type="text/css">
-            @import "recipe.css";
+            /*@import "recipe.css";*/
 
             .tag-input {
                 margin-top: -1px;
@@ -98,46 +81,53 @@ if (!isset($_SESSION['loggedin'])) {
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
         <!-- Optional theme -->
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+        <!--<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">-->
         <!-- Latest compiled and minified JavaScript -->
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
         <script src="client/controller.js"></script>
     </head>
     <body data-ng-controller="PageCtrl">
-        <div class="navbar">
+        <div class="navbar navbar-default">
             <div class="container">
-                <div class="navbar-nav">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
                     <a class="navbar-brand">Gastronomy Taxonomy</a>
                 </div>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#search">Find a recipe</a></li>
-                    <li data-ng-show="loggedIn"><a href="#add">Add a recipe</a></li>
-                    <li data-ng-show="loggedIn"><a href="#profile">Profile</a></li>
-                    <?php if ($_SESSION['isadmin'] == true) { ?>
-                        <li data-ng-show="loggedIn"><a href="#admin">Admin</a></li>
-                    <?php } ?>
-                    <li data-ng-show="loggedIn"><a data-ng-click="signout()">Sign out</a></li>
-                    <li data-ng-show="!loggedIn"><a data-ng-click="signin()">Sign in</a></li>
-                </ul>
+                <div class="navbar-collapse bs-navbar-collapse collapse" role="navigation" style="height: 1px;">
+                    <ul id="nav-bar-menu" class="nav navbar-nav navbar-right">
+                        <li id="nav-search"><a href="#search">Find a recipe</a></li>
+                        <li id="nav-add" data-ng-show="loggedIn"><a href="#add">Add a recipe</a></li>
+                        <li id="nav-profile" data-ng-show="loggedIn"><a href="#profile">Profile</a></li>
+                        <?php if ($_SESSION['isadmin'] == true) { ?>
+                            <li id="nav-admin" data-ng-show="loggedIn"><a href="#admin">Admin</a></li>
+                        <?php } ?>
+                        <li data-ng-show="loggedIn"><a data-ng-click="signout()">Sign out</a></li>
+                        <li data-ng-show="!loggedIn"><a data-ng-click="signin()">Sign in</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="container">
             <div id="loginBox" class="loginBox hide">
                 <div class="well">
                     <div id="loginAlert"></div>
-                    <form name="login" target="autocomp" method="post" action="login.html">
+                    <form name="login">
                         <label for="user">Username:</label>
-                        <input type="text" id="user" name="user" class="form-control" data-ng-model="username"/>
+                        <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
                         <label for="pass">Password:</label>
-                        <input type="password" id="pass" name="pass" class="form-control" data-ng-model="password"/>
+                        <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
+                        <br/>
                         <button type="button" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
                         <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
                         <a data-dialog="frmReg" style="font-size: small">Not registered?</a>
                         <a data-dialog="frmReset" style="font-size: small">Forgotten Password?</a>
                     </form>
-                    <div id="response" style="color: red"></div>
-                    <iframe name="autocomp" style="display: none"></iframe>
                 </div>
             </div>
         </div>
@@ -185,25 +175,6 @@ if (!isset($_SESSION['loggedin'])) {
                         <input type="submit" value="find"/>
                     </form>
                 </div>
-                <div class="page hide" id="list">
-                </div>
-                <div class="page hide" id="item" style="margin-left: 30px; border-left: 1px dashed red; padding-left: 30px; padding-right: 30px;">
-                </div>
-                <div class="page hide" id="image">
-                    <form name="form" action="" method="POST" enctype="multipart/form-data">
-                        <h1>Manage images for recipe: <span id="Title"></span></h1>
-                        <table id="image-list" width="100%">
-                        </table>
-                        <h1>Upload new image</h1>
-                        <input id="id" name="id" type="hidden" value=""/>
-                        <input id="Cmd" name="Cmd" type="hidden" value="imageUpload"/>
-                        <label for="imgDescription">Image Description</label>
-                        <input id="imgGescription" name="description" type="text" maxlength="255"/><br/>
-                        <label for="fileToUpload">Image File</label>
-                        <input id="fileToUpload" name="fileToUpload" type="file" size="45"/><br/>
-                        <button class="button" id="buttonUpload" onclick="javascript: return ajaxFileUpload($('#image form'));">Upload</button>
-                    </form>
-                </div>
                 <div class="hide" id="dialog">
                     <div id="frmReg" data-title="Register Account">
                         <form name="frmReg">
@@ -228,12 +199,6 @@ if (!isset($_SESSION['loggedin'])) {
                             <div id="responseReset" style="color: red"></div>
                         </form>
                     </div>
-                    <div id="error" data-title="Error">
-                        <span class="ui-icon ui-icon-alert" style="float: left"></span>
-                        <div></div>
-                    </div>
-                    <div id="dialogBlank"></div>
-                    <div id="dialogButtons"></div>
                 </div>
                 <div id="wait" class="wait hide"><p><img src="images/ajax-loader.gif" />&nbsp;&nbsp;Loading...</p></div>
             </div>

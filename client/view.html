@@ -4,18 +4,23 @@
         <img src='icons/{{recipe.Visibility.toLowerCase()}}.png' alt='{{recipe.Visibility}}' style='padding-left: 0.5em'/>
     </h1>
     <div style='float: right'>
-        <div style='text-align: right; margin-bottom: 1em;'>
-            <h2 style='margin: 0px'>Tags</h2>
-            <ul>
-                <li data-ng-repeat="tag in recipe.Tags">{{tag.Tag}}</li>
+        <div class="pull-right" style='margin-bottom: 1em;'>
+            <h2>Tags</h2>
+            <ul class="list-unstyled">
+                <li data-ng-repeat="tag in recipe.Tags"><button data-ng-click="tagSearch(tag)" class="btn btn-default">{{tag}}</button></li>
+            </ul>
+            <h2 data-ng-show="recipe.Cmds.edit || recipe.Cmds.delete || recipe.Cmds.image">Commands</h2>
+            <ul class="list-unstyled">
+                <li><button data-ng-show="recipe.Cmds.edit" data-ng-click="edit()" class="btn btn-default">Edit</button></li>
+                <li><button data-ng-show="recipe.Cmds.delete" class="btn btn-default">Delete</button></li>
+                <li><button data-ng-show="recipe.Cmds.image" class="btn btn-default">Manage Images</button></li>
             </ul>
         </div>
         <img data-ng-repeat="image in recipe.Images" style='width: 200px; margin-bottom: 1em; float: right; clear: right; border: 1px solid black' src='images/{{image.FilenameServer}}'/>
     </div>
     <div style='clear: left'></div>
     <div>
-        <h4>Author</h4>
-        <div>{{recipe.Author.Name}}</div>
+        <h4>Author <small>{{recipe.Author}}</small></h4>
     </div>
     <div>
         <h2>Description</h2>

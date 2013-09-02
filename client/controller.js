@@ -2,7 +2,7 @@ recipe = angular.module('recipe', []).
         config(['$routeProvider', function($routeProvider) {
         $routeProvider.
                 when('/', {templateUrl: 'client/list.html', controller: ListCtrl}).
-                when('/search/', {templateUrl: 'client/list.html', controller: ListCtrl}).
+                when('/search/', {templateUrl: 'client/list.html', controller: ListCtrl, reloadOnSearch: true}).
                 when('/view/:recipeId', {templateUrl: 'client/view.html', controller: ViewCtrl}).
                 when('/add/', {templateUrl: 'client/edit.html', controller: AddCtrl}).
                 when('/edit/:recipeId', {templateUrl: 'client/edit.html', controller: EditCtrl}).
@@ -14,35 +14,103 @@ recipe = angular.module('recipe', []).
         $templateCache.removeAll();
     });
 });
+recipe.factory('$recipeServer', function($http) {
+    var callServer = function(data, successCallback) {
+        $http({method: 'POST',
+            url: 'serverside/jsonResponder.php',
+            data: data,
+            headers: {'Content-Type': 'application/json'}
+        }).success(function(data, status, headers, config) {
+            successCallback(data);
+        }).error(function(data, status, headers, config) {
+            console.log("Error: " + data);
+        });
+    };
+    return {
+        amLoggedIn: function(callback) {
+            callServer({cmd: 'amLoggedIn'}, function(data) {
+                callback(data.loggedIn);
+            });
+        },
+        login: function(username, password, callback) {
+            callServer({cmd: 'login', username: username, password: password}, callback);
+        },
+        logout: function(callback) {
+            callServer({cmd: 'logout'}, function(data) {
+                callback(data.loggedIn);
+            });
+        },
+        updatePassword: function(password, newPassword, confNewPassword, successCallback, errorCallback) {
+            callServer({cmd: 'updatePassword', password: password, newPassword: newPassword, confNewPassword: confNewPassword}, function(data) {
+                if (data.error) {
+                    errorCallback(data.message);
+                } else {
+                    successCallback(data.message);
+                }
+            });
+        },
+        view: function(recipeId, successCallback, errorCallback) {
+            callServer({cmd: 'view', id: recipeId}, function(data) {
+                if (data.error) {
+                    errorCallback(data.message);
+                } else {
+                    successCallback(data.recipe);
+                }
+            });
+        },
+        edit: function(recipeId, successCallback, errorCallback) {
+            callServer({cmd: 'edit', id: recipeId}, function(data) {
+                if (data.error) {
+                    errorCallback(data.message);
+                } else {
+                    successCallback(data.recipe);
+                }
+            });
+        },
+        save: function(data, successCallback) {
+            callServer({cmd: 'save', recipe: data}, function(data) {
+                successCallback(data);
+            });
+        },
+        list: function(successCallback) {
+            callServer({cmd: 'list'}, function(data) {
+                successCallback(data);
+            });
+        }
+    };
+});
 recipe.directive('tagInput', function() {
     return {
         restrict: 'A',
+        scope: {
+            tagList: '=tagInput'
+        },
         link: function(scope, element, attrs) {
+            scope.inputValue = "";
             scope.inputWidth = 20;
             // Watch for changes in text field
             scope.$watch(attrs.ngModel, function(value) {
-//                if (value != undefined) {
-//                    var tempEl = $('<span>' + value + '</span>').appendTo('body');
-//                    scope.inputWidth = tempEl.width() + 5;
-//                    tempEl.remove();
-//                }
+                scope.inputValue = value;
             });
             element.bind('keydown', function(e) {
-                if (e.which == 9) {
-                    e.preventDefault();
-                }
-
-                if (e.which == 8 && scope.$apply(attrs.ngModel).length == 0) {
-                    scope.$apply(attrs.deleteTag)();
+                if (e.which == 8 && scope.inputValue.length == 0) {
+// delete previous tag
+                    scope.tagList.splice(scope.tagList.length - 1, 1);
                 }
                 scope.$apply();
             });
             element.bind('keyup', function(e) {
                 var key = e.which;
                 // Tab or Enter pressed 
-                if (key == 9 || key == 13) {
+                if (key == 13) {
                     e.preventDefault();
-                    scope.$apply(attrs.newTag)(scope.$apply(attrs.ngModel));
+                    var tag = scope.inputValue;
+                    // check for empty string
+                    if (tag.length != 0) {
+// add our string
+                        scope.tagList.push(tag);
+                        scope.$apply(attrs.ngModel + "=''");
+                    }
                 }
                 scope.$apply();
             });
@@ -55,141 +123,98 @@ recipe.directive('tagInput', function() {
         }
     };
 });
-
-function PageCtrl($scope, $http) {
+function PageCtrl($scope, $recipeServer) {
     $scope.loggedIn = false;
-    $scope.login = {};
+    $scope.user = {};
     $('#loginAlert').html('');
     // Test if logged in
-    $http({method: 'POST',
-        url: 'serverside/ajaxResponder.php',
-        data: 'Cmd=amLoggedIn',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-    }).
-            success(function(data, status, headers, config) {
-        $scope.loggedIn = data.loggedIn;
-    }).
-            error(function(data, status, headers, config) {
-        console.log("Error: " + data);
+    $recipeServer.amLoggedIn(function(loggedIn) {
+        $scope.loggedIn = loggedIn;
     });
     $scope.signin = function() {
         $("#loginBox").removeClass("hide");
     };
     $scope.signinSubmit = function() {
+        if ($scope.user.username === undefined)
+            $scope.user.username = $('#user').val();
+        if ($scope.user.password === undefined)
+            $scope.user.password = $('#pass').val();
         $('#loginAlert').html('');
-        $http({method: 'POST',
-            url: 'serverside/ajaxResponder.php',
-            data: 'Cmd=Login&user=' + $scope.username + '&pass=' + $scope.password,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-                success(function(data, status, headers, config) {
+        $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
             if (data.loggedIn == true) {
                 $scope.loggedIn = true;
-                $scope.login = {};
                 $("#loginBox").addClass("hide");
                 $('#loginAlert').html('');
             } else {
-                $('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.Message + '</span></div>');
+                $('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
             }
-        }).
-                error(function(data, status, headers, config) {
-            $("#loginError");
         });
     };
     $scope.signinCancel = function() {
         $("#loginBox").addClass("hide");
-        $scope.login = {};
+        $scope.user = {};
     };
     $scope.signout = function() {
-        $http({method: 'POST',
-            url: 'serverside/ajaxResponder.php',
-            data: 'Cmd=Logout',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).
-                success(function(data, status, headers, config) {
-            if (data.loggedIn == false) {
-                $scope.loggedIn = false;
-            }
-        }).
-                error(function(data, status, headers, config) {
-            alert("Error: " + data);
+        $recipeServer.logout(function(data) {
+            $scope.loggedIn = data;
         });
     };
 }
 
-function ListCtrl($scope, $http) {
+function ListCtrl($scope, $recipeServer, $routeParams, $location) {
+    $scope.search = $routeParams.search;
+    $("#nav-bar-menu li").removeClass("active");
+    $("#nav-search").addClass("active");
     $scope.recipes = [];
-    $http({method: 'POST',
-        url: 'serverside/ajaxResponder.php',
-        data: 'Cmd=search',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}}
-    ).
-            success(function(data, status, headers, config) {
-// this callback will be called asynchronously
-// when the response is available
-        $scope.recipes = data.Data.Recipes;
-    }).
-            error(function(data, status, headers, config) {
-// called asynchronously if an error occurs
-// or server returns response with an error status.
-        alert("Error: " + data);
+    $recipeServer.list(function(data) {
+        $scope.recipes = data.recipes;
     });
+    $scope.tagSearch = function(tag) {
+        $location.search("search=" + tag);
+    };
+    $scope.clearSearch = function(tag) {
+        $location.search("");
+        $scope.search = "";
+    };
 }
 
-function ViewCtrl($scope, $http, $routeParams, $location) {
+function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
+    $("#nav-bar-menu li").removeClass("active");
     $scope.recipeId = $routeParams.recipeId;
     $scope.recipe = {};
     $scope.recipe.Visibility = "public";
-    $http({method: 'POST',
-        url: 'serverside/ajaxResponder.php',
-        data: 'Cmd=view&ID=' + $scope.recipeId,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}}
-    ).
-            success(function(data, status, headers, config) {
-// this callback will be called asynchronously
-// when the response is available
-        if (!data.Error) {
-            $scope.recipe = data.Recipe;
-            $scope.recipe.Visibility = $scope.recipe.Visibility.split(" ").join("");
-            $scope.recipe.Title = $scope.recipe.Title.split("\n").join("<br/>");
-            $scope.recipe.Description = $scope.recipe.Description.split("\n");
-            $scope.recipe.Ingredients = $scope.recipe.Ingredients.split("\n");
-            $scope.recipe.Method = $scope.recipe.Method.split("\n");
-            $scope.recipe.Notes = $scope.recipe.Notes.split("\n");
-        } else {
-            $("#myModal .modal-title").html("Error");
-            $("#myModal div.modal-body").html(data.Message);
-            $('#myModal').on('hide.bs.modal', function() {
-                $location.path("/");
+    $recipeServer.view($scope.recipeId,
+            function(recipe) {
+                $scope.recipe = recipe;
+                $scope.recipe.Visibility = $scope.recipe.Visibility.split(" ").join("");
+                $scope.recipe.Title = $scope.recipe.Title.split("\n").join("<br/>");
+                $scope.recipe.Description = $scope.recipe.Description.split("\n");
+                $scope.recipe.Ingredients = $scope.recipe.Ingredients.split("\n");
+                $scope.recipe.Method = $scope.recipe.Method.split("\n");
+                $scope.recipe.Notes = $scope.recipe.Notes.split("\n");
+                // TODO: check for controls
+            },
+            function(message) {
+                $("#myModal .modal-title").html("Error");
+                $("#myModal div.modal-body").html(message);
+                $('#myModal').on('hide.bs.modal', function() {
+                    $location.path("/");
+                });
+                $("#myModal").modal();
             });
-            $("#myModal").modal();
-        }
-    }).
-            error(function(data, status, headers, config) {
-// called asynchronously if an error occurs
-// or server returns response with an error status.
-        alert("Error: " + data);
-    });
+    $scope.tagSearch = function(tag) {
+        $location.path("/search/").search("search=" + tag);
+    };
+    $scope.edit = function() {
+        $location.path("/edit/" + $scope.recipeId);
+    };
 }
 
-function AddCtrl($scope, $http) {
-    $scope.recipe = {};
-}
-
-function EditCtrl($scope, $http, $routeParams, $location) {
-    $scope.recipeId = $routeParams.recipeId;
-    $scope.recipe = {};
-    $scope.tagText = "";
-    $scope.addTag = function(tag) {
-// check for empty string
-        if (tag.length == 0) {
-            return;
-        }
-// add our string
-        $scope.recipe.Tags.push(tag);
-        $scope.tagText = "";
-    }
-
+function AddCtrl($scope, $recipeServer, $location) {
+    $("#nav-bar-menu li").removeClass("active");
+    $("#nav-add").addClass("active");
+    $scope.recipe = {Tags: [], Visibility: 0};
+    // TODO: Move this into the directive part for the input if possible
     $scope.deleteTag = function(tag) {
         if (tag === undefined) {
             $scope.recipe.Tags.splice($scope.recipe.Tags.length - 1, 1);
@@ -197,36 +222,67 @@ function EditCtrl($scope, $http, $routeParams, $location) {
             $scope.recipe.Tags.splice(tag, 1);
         }
     };
-    $http({method: 'POST',
-        url: 'serverside/ajaxResponder.php',
-        data: 'Cmd=edit&ID=' + $scope.recipeId,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}}
-    ).
-            success(function(data, status, headers, config) {
-// this callback will be called asynchronously
-// when the response is available
-        if (!data.Error) {
-            $scope.recipe = data.Recipe;
-            var tags = $scope.recipe.Tags;
-            for (var i = 0; i < tags.length; i++) {
-                $scope.recipe.Tags[i] = tags[i].Tag;
-            }
-        } else {
-            $("#myModal .modal-title").html("Error");
-            $("#myModal div.modal-body").html(data.Message);
-            $('#myModal').on('hide.bs.modal', function() {
-                $location.path("/");
-            });
-            $("#myModal").modal();
-        }
-    }).
-            error(function(data, status, headers, config) {
-// called asynchronously if an error occurs
-// or server returns response with an error status.
-        alert("Error: " + data);
-    });
+    $scope.save = function() {
+        $recipeServer.save($scope.recipe, function (data){
+            $location.path("/view/" + data['recipeId']);
+        });
+    };
+    $scope.cancel = function() {
+//TODO: check form for changes and ask before continuing.
+
+        $location.path("/search/");
+    };
 }
 
-function ProfileCtrl($scope, $http) {
+function EditCtrl($scope, $recipeServer, $routeParams, $location) {
+    $("#nav-bar-menu li").removeClass("active");
+    $scope.recipeId = $routeParams.recipeId;
+    $scope.recipe = {};
+    // TODO: Move this into the directive part for the input if possible
+    $scope.deleteTag = function(tag) {
+        if (tag === undefined) {
+            $scope.recipe.Tags.splice($scope.recipe.Tags.length - 1, 1);
+        } else {
+            $scope.recipe.Tags.splice(tag, 1);
+        }
+    };
+    $recipeServer.edit($scope.recipeId,
+            function(recipe) {
+                $scope.recipe = recipe;
+            },
+            function(message) {
+                $("#myModal .modal-title").html("Error");
+                $("#myModal div.modal-body").html(message);
+                $('#myModal').on('hide.bs.modal', function() {
+                    $location.path("/");
+                });
+                $("#myModal").modal();
+            });
+    $scope.save = function() {
 
+    };
+    $scope.cancel = function() {
+//TODO: check form for changes and ask before continuing.
+
+        $location.path("/view/" + $scope.recipeId);
+    };
+}
+
+function ProfileCtrl($scope, $recipeServer) {
+    $("#nav-bar-menu li").removeClass("active");
+    $("#nav-profile").addClass("active");
+    $scope.profile = {};
+    $scope.save = function() {
+        $("#msgHolder").html("");
+        var password = $scope.profile.password;
+        var newPassword = $scope.profile.newPassword;
+        var confNewPassword = $scope.profile.confNewPassword;
+        $recipeServer.updatePassword(password, newPassword, confNewPassword,
+                function(message) {
+                    $("#msgHolder").html('<div class="alert alert-success"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
+                },
+                function(message) {
+                    $("#msgHolder").html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
+                });
+    };
 }
