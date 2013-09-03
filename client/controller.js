@@ -79,6 +79,7 @@ recipe.factory('$recipeServer', function($http) {
         }
     };
 });
+
 recipe.directive('tagInput', function() {
     return {
         restrict: 'A',
@@ -123,7 +124,8 @@ recipe.directive('tagInput', function() {
         }
     };
 });
-function PageCtrl($scope, $recipeServer) {
+
+function PageCtrl($scope, $route, $recipeServer) {
     $scope.loggedIn = false;
     $scope.user = {};
     $('#loginAlert').html('');
@@ -134,44 +136,114 @@ function PageCtrl($scope, $recipeServer) {
     $scope.signin = function() {
         $("#loginBox").removeClass("hide");
     };
+
+    $scope.signout = function() {
+        $recipeServer.logout(function(data) {
+            $scope.loggedIn = data;
+            $route.reload();
+        });
+    };
+
     $scope.signinSubmit = function() {
         if ($scope.user.username === undefined)
             $scope.user.username = $('#user').val();
         if ($scope.user.password === undefined)
             $scope.user.password = $('#pass').val();
         $('#loginAlert').html('');
-        $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
-            if (data.loggedIn == true) {
-                $scope.loggedIn = true;
-                $("#loginBox").addClass("hide");
-                $('#loginAlert').html('');
-            } else {
-                $('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
-            }
-        });
+
+        if ($scope.user.username == undefined || $scope.user.password == undefined) {
+            $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
+        } else {
+            $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
+                if (data.loggedIn == true) {
+                    $scope.loggedIn = true;
+                    $("#loginBox").addClass("hide");
+                    $route.reload();
+                } else {
+                    $('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                }
+            });
+        }
     };
+
     $scope.signinCancel = function() {
         $("#loginBox").addClass("hide");
         $scope.user = {};
     };
-    $scope.signout = function() {
-        $recipeServer.logout(function(data) {
-            $scope.loggedIn = data;
+
+    $scope.register = function() {
+        $("#loginBox").addClass("hide");
+        $("#registerBox").removeClass("hide");
+    };
+
+    $scope.registerSubmit = function() {
+        if ($scope.user.username === undefined)
+            $scope.user.username = $('#user').val();
+        if ($scope.user.password === undefined)
+            $scope.user.password = $('#pass').val();
+        $('#registerAlert').html('');
+
+        if ($scope.user.username == undefined || $scope.user.password == undefined) {
+            $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
+        } else {
+            $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
+                if (data.loggedIn == true) {
+                    $scope.loggedIn = true;
+                    $("#loginBox").addClass("hide");
+                    $route.reload();
+                } else {
+                    $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                }
+            });
+        }
+    };
+
+    $scope.registerCancel = function() {
+        $("#registerBox").addClass("hide");
+    };
+
+    $scope.reset = function() {
+        $("#loginBox").addClass("hide");
+        $("#resetBox").removeClass("hide");
+    };
+
+    $scope.resetSubmit = function() {
+        if ($scope.user.username === undefined)
+            $scope.user.username = $('#user').val();
+        if ($scope.user.password === undefined)
+            $scope.user.password = $('#pass').val();
+        $('#resetAlert').html('');
+        $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
+            if (data.loggedIn == true) {
+                $scope.loggedIn = true;
+                $("#loginBox").addClass("hide");
+                $route.reload();
+            } else {
+                $('#resetAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+            }
         });
+    };
+
+    $scope.resetCancel = function() {
+        $("#resetBox").addClass("hide");
     };
 }
 
 function ListCtrl($scope, $recipeServer, $routeParams, $location) {
-    $scope.search = $routeParams.search;
     $("#nav-bar-menu li").removeClass("active");
     $("#nav-search").addClass("active");
+
+    $scope.search = $routeParams.search;
     $scope.recipes = [];
+
     $recipeServer.list(function(data) {
         $scope.recipes = data.recipes;
     });
+
     $scope.tagSearch = function(tag) {
         $location.search("search=" + tag);
     };
+
     $scope.clearSearch = function(tag) {
         $location.search("");
         $scope.search = "";
@@ -223,13 +295,12 @@ function AddCtrl($scope, $recipeServer, $location) {
         }
     };
     $scope.save = function() {
-        $recipeServer.save($scope.recipe, function (data){
+        $recipeServer.save($scope.recipe, function(data) {
             $location.path("/view/" + data['recipeId']);
         });
     };
     $scope.cancel = function() {
 //TODO: check form for changes and ask before continuing.
-
         $location.path("/search/");
     };
 }
@@ -259,11 +330,13 @@ function EditCtrl($scope, $recipeServer, $routeParams, $location) {
                 $("#myModal").modal();
             });
     $scope.save = function() {
-
+        $scope.ID = $scope.recipeID;
+        $recipeServer.save($scope.recipe, function(data) {
+            $location.path("/view/" + $scope.recipeId);
+        });
     };
     $scope.cancel = function() {
 //TODO: check form for changes and ask before continuing.
-
         $location.path("/view/" + $scope.recipeId);
     };
 }

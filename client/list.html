@@ -1,11 +1,6 @@
 <div>
-    <div class="col-lg-6">
-        <label style="display: inline" for="input-public">Public:</label>
-        <input type="radio" id="input-public" name="search-type" value="Public">
-        <label style="display: inline" for="input-private">Private:</label>
-        <input type="radio" id="input-private" name="search-type" value="Private">
-    </div>
-    <div class="col-lg-6">
+    <div class="col-lg-8"></div>
+    <div class="col-lg-4 no-side-padding">
         <div class="input-group">
             <span class="input-group-addon">Search:</span>
             <input class="form-control" type="text" name="input-search" data-ng-model="search"/>
@@ -14,7 +9,8 @@
             </span>
         </div>
     </div>
-    <table class="table table-hover table-striped table-responsive" style="clear: right; width: 100%;">
+    <br/>
+    <table id="list-table" class="table table-hover table-striped table-responsive" style="clear: right; width: 100%;">
         <thead>
             <tr class="">
                 <th>Title</th>

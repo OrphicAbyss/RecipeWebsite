@@ -11,6 +11,8 @@ if (!isset($_SESSION['loggedin'])) {
 ?><!DOCTYPE html>
 <html data-ng-app="recipe">
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <title>Recipe Notebook</title>
         <!-- Load jQuery Library -->
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
@@ -66,6 +68,22 @@ if (!isset($_SESSION['loggedin'])) {
                 -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);
                 box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);
             }
+
+            div.no-side-padding {
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+
+            .table {
+                border-radius: 4px;
+            }
+
+            @media only screen and (max-width: 800px) {
+                #list-table td:nth-child(3),
+                #list-table th:nth-child(3) {
+                    display: none;
+                }
+            }
         </style>
         <script type="text/javascript">
 //            $(document).ready(function() {
@@ -114,21 +132,50 @@ if (!isset($_SESSION['loggedin'])) {
             </div>
         </div>
         <div class="container">
-            <div id="loginBox" class="loginBox hide">
-                <div class="well">
-                    <div id="loginAlert"></div>
-                    <form name="login">
-                        <label for="user">Username:</label>
-                        <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
-                        <label for="pass">Password:</label>
-                        <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
-                        <br/>
+            <div id="loginBox" class="well hide">
+                <div id="loginAlert"></div>
+                <form name="login">
+                    <label for="user">Username:</label>
+                    <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
+                    <label for="pass">Password:</label>
+                    <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
+                    <br/>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-sm" data-ng-click="register()">Not registered?</button>
+                        <button type="button" class="btn btn-sm" data-ng-click="reset()">Forgotten Password?</button>
+                    </div>
+                    <div class="">
                         <button type="button" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
                         <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
-                        <a data-dialog="frmReg" style="font-size: small">Not registered?</a>
-                        <a data-dialog="frmReset" style="font-size: small">Forgotten Password?</a>
-                    </form>
-                </div>
+                    </div>
+                </form>
+            </div>
+            <div id="registerBox" class="well hide">
+                <div id="registerAlert"></div>
+                <form name="frmReg">
+                    <label for="Name">Username:</label>
+                    <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
+                    <label for="Pass">Password:</label>
+                    <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
+                    <label for="Email">Email:</label>
+                    <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
+                    <br/>
+                    <div class="">
+                        <button type="button" class="btn btn-primary" type="registerSubmit()">Register</button>
+                        <button type="button" class="btn btn-default" data-ng-click="registerCancel()">Cancel</button>
+                    </div>
+            </div>
+            <div id="resetBox" class="well hide">
+                <div id="resetAlert"></div>
+                <form name="frmReset">
+                    <label for="Email">Registered Email:</label>
+                    <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
+                    <br/>
+                    <div class="">
+                        <button type="button" class="btn btn-primary" type="resetSubmit()">Reset Password</button>
+                        <button type="button" class="btn btn-default" data-ng-click="resetCancel()">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
         <div>
@@ -175,32 +222,6 @@ if (!isset($_SESSION['loggedin'])) {
                         <input type="submit" value="find"/>
                     </form>
                 </div>
-                <div class="hide" id="dialog">
-                    <div id="frmReg" data-title="Register Account">
-                        <form name="frmReg">
-                            <label for="Name">Username:</label>
-                            <input type="text" id="Name" name="user" />
-                            <label for="Pass">Password:</label>
-                            <input type="password" id="Pass" name="pass" />
-                            <label for="Email">Email:</label>
-                            <input type="text" id="Email" name="Email" />
-                            <input type="hidden" id="Cmd" name="Cmd" value="Register"/>
-                            <input name="btnRegister" style="float: right" value="Register" type="submit"/>
-                            <div class="clear"></div>
-                        </form>
-                    </div>
-                    <div id="frmReset" data-title="Reset Password">
-                        <form name="frmReset">
-                            <label for="Email">Registered Email:</label>
-                            <input type="text" id="Email" name="Email" />
-                            <input type="hidden" id="Cmd" name="Cmd" value="ResetPass"/>
-                            <input name="btnRegister" style="float: right" value="Reset Password" type="submit"/>
-                            <div class="clear"></div>
-                            <div id="responseReset" style="color: red"></div>
-                        </form>
-                    </div>
-                </div>
-                <div id="wait" class="wait hide"><p><img src="images/ajax-loader.gif" />&nbsp;&nbsp;Loading...</p></div>
             </div>
         </div>
     </body>
