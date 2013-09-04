@@ -1,0 +1,15 @@
+<div>
+    <form name="form">
+        <h1>Manage images for recipe: <span id="Title"></span></h1>
+        <table id="image-list" width="100%">
+        </table>
+        <h1>Upload new image</h1>
+        <input id="id" name="id" type="hidden" value=""/>
+        <input id="Cmd" name="Cmd" type="hidden" value="imageUpload"/>
+        <label for="imgDescription">Image Description</label>
+        <input id="imgGescription" name="description" type="text" maxlength="255"/><br/>
+        <label for="fileToUpload">Image File</label>
+        <input id="fileToUpload" name="fileToUpload" type="file" size="45"/><br/>
+        <button class="button" id="buttonUpload" onclick="javascript: return ajaxFileUpload($('#image form'));">Upload</button>
+    </form>
+</div>

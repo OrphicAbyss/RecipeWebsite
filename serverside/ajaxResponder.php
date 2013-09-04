@@ -41,51 +41,6 @@ switch ($_POST['Cmd']) {
 // If we aren't logged in we can: Login, Register, Reset Password or Confirm an account
 if ($_SESSION['loggedin'] != true) {
     switch ($_POST['Cmd']) {
-        case 'ResetPass':
-            $email = mysql_real_escape_string($_POST['Email'], getConnection());
-            $user = User::findByEmail($email);
-
-            if ($user == null) {
-                $returnMsg->returnText("responseReset", "The email provided is not registered.");
-            } else {
-                // Reset the choosen user
-                $pass = generatePassword(8, 5);
-                $user->Salt = mysql_real_escape_string(sha1(time()), getConnection());
-                $user->Pass = mysql_real_escape_string($user->hashPass($pass), getConnection());
-
-                // Email the user to let them know their new password
-                mail($email, "Recipe Note: Password Reset", "Your password has been reset as per your request on Recipe Note.\n\n Your new password is: $pass\n\n Log into Recipe note at: http://www.gluonporridge.net/recipetest/ and change your password after logging in with your new password.", "From: RecipeNote@gluonporridge.net");
-
-                $user->save();
-
-                //message to check their email for new password
-                $returnMsg->returnMessage("Your password has been reset and emailed to you at your registered email address.");
-            }
-            break;
-
-        case 'Register':
-            $user = new User();
-            $user->Name = mysql_real_escape_string($_POST['user'], getConnection());
-            $user->Salt = mysql_real_escape_string(sha1(time()), getConnection());
-            $user->Hash = mysql_real_escape_string(sha1($_POST['pass'] . $user->Salt), getConnection());
-            $user->Email = mysql_real_escape_string($_POST['Email'], getConnection());
-            $user->Confirmation = mysql_real_escape_string(uniqid(), getConnection());
-
-            $existingUser = User::findByName($user->Name);
-            if ($existingUser != null) {
-                //send email for user to confirm email address
-                mail($_POST['Email'], "Recipe Note: Registration Confirmation", "Thank you for registering with Recipe Note. To Complete the registration process click on the link below or copy and paste it into a new browser window:\n\n" .
-                        "http://www.gluonporridge.net/recipetest/#username=$user->Name&confirm=$user->Confirmation\n\nIf you didn't register with Recipe Note recently please ignore this email.", "From: RecipeNote@gluonporridge.net");
-
-                $user->save();
-
-                //message to check their email for the confirmation email
-                $returnMsg->returnMessage("Registration has been successful.\n\n You should receive a confirmation email shortly to compete the registration process.");
-            } else {
-                $returnMsg->returnError("Username may already be in use.");
-            }
-            break;
-
         case 'Confirm':
             $name = mysql_real_escape_string($_POST['username'], getConnection());
             $confirm = mysql_real_escape_string($_POST['confirm'], getConnection());
@@ -111,55 +66,6 @@ if ($_SESSION['loggedin'] != true) {
     // If we are logged in we can: Log out, Update our password, Save a recipe, edit a recipe, delete a recipe, upload an image, delete an image (not yet done), Or do some admin functions if we have permissions
 } else {
     switch ($_POST['Cmd']) {
-
-        case 'SaveRecipe':
-            $recipeToSave = new Recipe();
-
-            // If we are aren't a new recipe (pre-populate the object)
-            if ($_POST['ID'] != "") {
-                $recipeToSave = Recipe::find(mysql_real_escape_string($_POST['ID'], getConnection()));
-            }
-
-            $recipeToSave->Title = mysql_real_escape_string($_POST['Title'], getConnection());
-            $recipeToSave->Description = mysql_real_escape_string($_POST['Description'], getConnection());
-            $recipeToSave->Ingredients = mysql_real_escape_string($_POST['Ingredients'], getConnection());
-            $recipeToSave->Method = mysql_real_escape_string($_POST['Method'], getConnection());
-            $recipeToSave->Notes = mysql_real_escape_string($_POST['Notes'], getConnection());
-            $recipeToSave->Source = mysql_real_escape_string($_POST['Source'], getConnection());
-            $recipeToSave->Visibility = mysql_real_escape_string($_POST['Visibility'], getConnection());
-            $recipeToSave->AuthorID = $_SESSION['userid'];
-            $recipeToSave->save();
-
-            $returnMsg->setMsgType(AjaxMessage::TYPE_CALLBACK);
-            $returnMsg->setData("Cmd=view&ID=" . $recipeToSave->ID);
-
-            // easiest way to update tags is to delete the current ones in the database for the recipe and re-insert the ones on the form
-            $sql = "DELETE FROM RecipeTags WHERE RecipeID = $recipeToSave->ID";
-            // Delete all the old tag links before we insert the new ones
-            $result = runQuery($sql);
-
-            //deal with tags
-            $tags = explode(",", $_POST['Tags']);
-            $recipeToSave->replaceTags($tags);
-
-            break;
-
-        case 'edit':
-            $ID = mysql_real_escape_string($_POST['ID'], getConnection());
-
-            $recipe = Recipe::find($ID);
-            $data = array();
-            $data['Error'] = false;
-            if ($recipe == null) {
-                $data['Error'] = true;
-                $data['Message'] = "Unable to find the recipe you wanted.";
-            } else {
-                $recipe->populateTags();
-                $data['Recipe'] = $recipe;
-            }
-            echo json_encode($data);
-            $returnMsg->setIgnore(true);
-            break;
 
         case 'GetTags':
             $tags = Tag::findAll();

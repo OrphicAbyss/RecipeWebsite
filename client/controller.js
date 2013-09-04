@@ -14,6 +14,20 @@ recipe = angular.module('recipe', []).
         $templateCache.removeAll();
     });
 });
+
+recipe.factory('$dialog', function() {
+    return {
+        open: function(title, message) {
+            angular.element("#myModal .modal-title").html(title);
+            angular.element("#myModal div.modal-body").html(message);
+//            angular.element('#myModal').on('hide.bs.modal', function() {
+//                $route.reload();
+//            });
+            angular.element("#myModal").modal();
+        }
+    };
+});
+
 recipe.factory('$recipeServer', function($http) {
     var callServer = function(data, successCallback) {
         $http({method: 'POST',
@@ -34,6 +48,12 @@ recipe.factory('$recipeServer', function($http) {
         },
         login: function(username, password, callback) {
             callServer({cmd: 'login', username: username, password: password}, callback);
+        },
+        reset: function(email, callback) {
+            callServer({cmd: 'reset', email: email}, callback);
+        },
+        register: function(username, password, email, callback) {
+            callServer({cmd: 'register', username: username, password: password, email: email}, callback);
         },
         logout: function(callback) {
             callServer({cmd: 'logout'}, function(data) {
@@ -95,7 +115,7 @@ recipe.directive('tagInput', function() {
             });
             element.bind('keydown', function(e) {
                 if (e.which == 8 && scope.inputValue.length == 0) {
-// delete previous tag
+                    // delete previous tag
                     scope.tagList.splice(scope.tagList.length - 1, 1);
                 }
                 scope.$apply();
@@ -108,7 +128,7 @@ recipe.directive('tagInput', function() {
                     var tag = scope.inputValue;
                     // check for empty string
                     if (tag.length != 0) {
-// add our string
+                        // add our string
                         scope.tagList.push(tag);
                         scope.$apply(attrs.ngModel + "=''");
                     }
@@ -125,16 +145,17 @@ recipe.directive('tagInput', function() {
     };
 });
 
-function PageCtrl($scope, $route, $recipeServer) {
+function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
     $scope.loggedIn = false;
     $scope.user = {};
-    $('#loginAlert').html('');
+    angular.element('#loginAlert').html('');
     // Test if logged in
     $recipeServer.amLoggedIn(function(loggedIn) {
         $scope.loggedIn = loggedIn;
     });
+
     $scope.signin = function() {
-        $("#loginBox").removeClass("hide");
+        angular.element("#loginBox").modal();
     };
 
     $scope.signout = function() {
@@ -146,92 +167,141 @@ function PageCtrl($scope, $route, $recipeServer) {
 
     $scope.signinSubmit = function() {
         if ($scope.user.username === undefined)
-            $scope.user.username = $('#user').val();
+            $scope.user.username = angular.element('#user').val();
         if ($scope.user.password === undefined)
-            $scope.user.password = $('#pass').val();
-        $('#loginAlert').html('');
+            $scope.user.password = angular.element('#pass').val();
 
-        if ($scope.user.username == undefined || $scope.user.password == undefined) {
-            $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
+        angular.element('#loginAlert').html('');
+
+        if ($scope.user.username == undefined ||
+                $scope.user.username == "" ||
+                $scope.user.password == undefined ||
+                $scope.user.password == "") {
+            angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
         } else {
             $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
                 if (data.loggedIn == true) {
                     $scope.loggedIn = true;
-                    $("#loginBox").addClass("hide");
+                    angular.element("#loginBox").modal('hide');
                     $route.reload();
                 } else {
-                    $('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                    angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
                 }
             });
         }
     };
 
     $scope.signinCancel = function() {
-        $("#loginBox").addClass("hide");
-        $scope.user = {};
+        angular.element("#loginBox").modal('hide');
+        //$scope.user = {};
     };
 
     $scope.register = function() {
-        $("#loginBox").addClass("hide");
-        $("#registerBox").removeClass("hide");
+        $('#loginBox').on('hidden.bs.modal', function(e) {
+            angular.element("#registerBox").modal();
+            $('#loginBox').off('hidden.bs.modal');
+        });
+        angular.element("#loginBox").modal('hide');
     };
 
     $scope.registerSubmit = function() {
         if ($scope.user.username === undefined)
-            $scope.user.username = $('#user').val();
+            $scope.user.username = angular.element('#user').val();
         if ($scope.user.password === undefined)
-            $scope.user.password = $('#pass').val();
-        $('#registerAlert').html('');
+            $scope.user.password = angular.element('#pass').val();
 
-        if ($scope.user.username == undefined || $scope.user.password == undefined) {
-            $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
+        angular.element('#registerAlert').html('');
+
+        if ($scope.user.username == undefined ||
+                $scope.user.username == "" ||
+                $scope.user.password == undefined ||
+                $scope.user.password == "") {
+            angular.element('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
         } else {
-            $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
-                if (data.loggedIn == true) {
-                    $scope.loggedIn = true;
-                    $("#loginBox").addClass("hide");
-                    $route.reload();
+            $recipeServer.register($scope.user.username, $scope.user.password, $scope.user.email, function(data) {
+                if (data.error == false) {
+                    $('#registerBox').on('hidden.bs.modal', function(e) {
+                        $dialog.open("Registerd", data.message);
+                    });
+                    angular.element("#registerBox").modal("hide");
+
                 } else {
-                    $('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                    angular.element('#registerAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
                 }
             });
         }
     };
 
     $scope.registerCancel = function() {
-        $("#registerBox").addClass("hide");
+        angular.element("#registerBox").modal("hide");
     };
 
     $scope.reset = function() {
-        $("#loginBox").addClass("hide");
-        $("#resetBox").removeClass("hide");
+        $('#loginBox').on('hidden.bs.modal', function(e) {
+            angular.element("#resetBox").modal();
+            $('#loginBox').off('hidden.bs.modal');
+        });
+        angular.element("#loginBox").modal("hide");
+
     };
 
     $scope.resetSubmit = function() {
-        if ($scope.user.username === undefined)
-            $scope.user.username = $('#user').val();
-        if ($scope.user.password === undefined)
-            $scope.user.password = $('#pass').val();
-        $('#resetAlert').html('');
-        $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
-            if (data.loggedIn == true) {
-                $scope.loggedIn = true;
-                $("#loginBox").addClass("hide");
-                $route.reload();
+        angular.element('#resetAlert').html('');
+        $recipeServer.reset($scope.user.email, function(data) {
+            if (data.error == false) {
+                $('#resetBox').on('hidden.bs.modal', function(e) {
+                    $dialog.open("Password reset", data.message);
+                    $('#resetBox').off('hidden.bs.modal');
+                });
+                angular.element("#resetBox").modal("hide");
+                //$route.reload();
             } else {
-                $('#resetAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                angular.element('#resetAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
             }
         });
     };
 
     $scope.resetCancel = function() {
-        $("#resetBox").addClass("hide");
+        angular.element("#resetBox").modal("hide");
+    };
+}
+
+function LoginCtrl($scope, $recipeServer, $route) {
+    $scope.signinSubmit = function() {
+        if ($scope.user.username === undefined)
+            $scope.user.username = angular.element('#user').val();
+        if ($scope.user.password === undefined)
+            $scope.user.password = angular.element('#pass').val();
+
+        angular.element('#loginAlert').html('');
+
+        if ($scope.user.username == undefined ||
+                $scope.user.username == "" ||
+                $scope.user.password == undefined ||
+                $scope.user.password == "") {
+            angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
+        } else {
+            $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
+                if (data.loggedIn == true) {
+                    $scope.loggedIn = true;
+                    angular.element("#loginBox").addClass("hide");
+                    $route.reload();
+                } else {
+                    angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
+                }
+            });
+        }
+    };
+
+    $scope.signinCancel = function() {
+        angular.element("#loginBox").addClass("hide");
+        $scope.user = {};
     };
 }
 
 function ListCtrl($scope, $recipeServer, $routeParams, $location) {
-    $("#nav-bar-menu li").removeClass("active");
-    $("#nav-search").addClass("active");
+    angular.element("#nav-bar-menu li").removeClass("active");
+    angular.element("#nav-search").addClass("active");
 
     $scope.search = $routeParams.search;
     $scope.recipes = [];
@@ -251,7 +321,7 @@ function ListCtrl($scope, $recipeServer, $routeParams, $location) {
 }
 
 function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
-    $("#nav-bar-menu li").removeClass("active");
+    angular.element("#nav-bar-menu li").removeClass("active");
     $scope.recipeId = $routeParams.recipeId;
     $scope.recipe = {};
     $scope.recipe.Visibility = "public";
@@ -267,12 +337,10 @@ function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
                 // TODO: check for controls
             },
             function(message) {
-                $("#myModal .modal-title").html("Error");
-                $("#myModal div.modal-body").html(message);
-                $('#myModal').on('hide.bs.modal', function() {
-                    $location.path("/");
-                });
-                $("#myModal").modal();
+                $dialog.open("Error", message);
+//                angular.element('#myModal').on('hide.bs.modal', function() {
+//                    $location.path("/");
+//                });
             });
     $scope.tagSearch = function(tag) {
         $location.path("/search/").search("search=" + tag);
@@ -283,8 +351,8 @@ function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
 }
 
 function AddCtrl($scope, $recipeServer, $location) {
-    $("#nav-bar-menu li").removeClass("active");
-    $("#nav-add").addClass("active");
+    angular.element("#nav-bar-menu li").removeClass("active");
+    angular.element("#nav-add").addClass("active");
     $scope.recipe = {Tags: [], Visibility: 0};
     // TODO: Move this into the directive part for the input if possible
     $scope.deleteTag = function(tag) {
@@ -306,7 +374,7 @@ function AddCtrl($scope, $recipeServer, $location) {
 }
 
 function EditCtrl($scope, $recipeServer, $routeParams, $location) {
-    $("#nav-bar-menu li").removeClass("active");
+    angular.element("#nav-bar-menu li").removeClass("active");
     $scope.recipeId = $routeParams.recipeId;
     $scope.recipe = {};
     // TODO: Move this into the directive part for the input if possible
@@ -322,12 +390,10 @@ function EditCtrl($scope, $recipeServer, $routeParams, $location) {
                 $scope.recipe = recipe;
             },
             function(message) {
-                $("#myModal .modal-title").html("Error");
-                $("#myModal div.modal-body").html(message);
-                $('#myModal').on('hide.bs.modal', function() {
-                    $location.path("/");
-                });
-                $("#myModal").modal();
+                $dialog.open("Error", message);
+//                angular.element('#myModal').on('hide.bs.modal', function() {
+//                    $location.path("/");
+//                });
             });
     $scope.save = function() {
         $scope.ID = $scope.recipeID;
@@ -342,20 +408,20 @@ function EditCtrl($scope, $recipeServer, $routeParams, $location) {
 }
 
 function ProfileCtrl($scope, $recipeServer) {
-    $("#nav-bar-menu li").removeClass("active");
-    $("#nav-profile").addClass("active");
+    angular.element("#nav-bar-menu li").removeClass("active");
+    angular.element("#nav-profile").addClass("active");
     $scope.profile = {};
     $scope.save = function() {
-        $("#msgHolder").html("");
+        angular.element("#msgHolder").html("");
         var password = $scope.profile.password;
         var newPassword = $scope.profile.newPassword;
         var confNewPassword = $scope.profile.confNewPassword;
         $recipeServer.updatePassword(password, newPassword, confNewPassword,
                 function(message) {
-                    $("#msgHolder").html('<div class="alert alert-success"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
+                    angular.element("#msgHolder").html('<div class="alert alert-success"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
                 },
                 function(message) {
-                    $("#msgHolder").html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
+                    angular.element("#msgHolder").html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>');
                 });
     };
 }

@@ -12,16 +12,10 @@ if (!isset($_SESSION['loggedin'])) {
 <html data-ng-app="recipe">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
         <title>Recipe Notebook</title>
-        <!-- Load jQuery Library -->
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-
-        <!-- Load stacktrack js library -->
-        <script type="text/javascript" src="stacktrace-0.3.js"></script>
 
         <!-- Load ajaxFileUpload library -->
-        <script type="text/javascript" src="ajaxfileupload.js"></script>
+<!--        <script type="text/javascript" src="ajaxfileupload.js"></script>-->
 
         <!-- Piwik -->
         <script type="text/javascript" src="../piwik/piwik.js"></script>
@@ -74,8 +68,39 @@ if (!isset($_SESSION['loggedin'])) {
                 padding-right: 0px;
             }
 
-            .table {
-                border-radius: 4px;
+            html {
+                height: 100%;
+            }
+
+            body {
+                position: relative;
+                min-height: 100%;
+            }
+
+            table.table tr:last-child td:first-child {
+                -moz-border-radius-bottomleft:10px;
+                -webkit-border-bottom-left-radius:10px;
+                border-bottom-left-radius:10px
+            }
+
+            table.table tr:last-child td:last-child {
+                -moz-border-radius-bottomright:10px;
+                -webkit-border-bottom-right-radius:10px;
+                border-bottom-right-radius:10px
+            }
+
+            .main-div {
+                padding-bottom: 120px;
+            }
+
+            .footer {
+                position: absolute;
+                bottom: 0px;
+                width: 100%;
+                border-top: 1px solid #ccc;
+                background-color: #eee;
+                color: #555;
+                padding-top: 15px;
             }
 
             @media only screen and (max-width: 800px) {
@@ -101,8 +126,9 @@ if (!isset($_SESSION['loggedin'])) {
         <!-- Optional theme -->
         <!--<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">-->
         <!-- Latest compiled and minified JavaScript -->
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.js"></script>
         <script src="client/controller.js"></script>
     </head>
     <body data-ng-controller="PageCtrl">
@@ -125,57 +151,89 @@ if (!isset($_SESSION['loggedin'])) {
                         <?php if ($_SESSION['isadmin'] == true) { ?>
                             <li id="nav-admin" data-ng-show="loggedIn"><a href="#admin">Admin</a></li>
                         <?php } ?>
-                        <li data-ng-show="loggedIn"><a data-ng-click="signout()">Sign out</a></li>
-                        <li data-ng-show="!loggedIn"><a data-ng-click="signin()">Sign in</a></li>
+                        <li data-ng-show="loggedIn"><a href="" data-ng-click="signout()">Sign out</a></li>
+                        <li data-ng-show="!loggedIn"><a href="" data-ng-click="signin()">Sign in</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="container">
-            <div id="loginBox" class="well hide">
-                <div id="loginAlert"></div>
-                <form name="login">
-                    <label for="user">Username:</label>
-                    <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
-                    <label for="pass">Password:</label>
-                    <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
-                    <br/>
-                    <div class="pull-right">
-                        <button type="button" class="btn btn-sm" data-ng-click="register()">Not registered?</button>
-                        <button type="button" class="btn btn-sm" data-ng-click="reset()">Forgotten Password?</button>
+            <div ng-include="" id="box"></div>
+            <div id="loginBox" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-ng-click="signinCancel()">&times;</button>
+                            <h4 class="modal-title">Sign in</h4>
+                        </div>
+                        <form name="login">
+                            <div class="modal-body">
+                                <div id="loginAlert"></div>
+
+                                <label for="user">Username:</label>
+                                <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
+                                <label for="pass">Password:</label>
+                                <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="pull-left">
+                                    <button type="button" class="btn btn-sm" data-ng-click="register()">Not registered?</button>
+                                    <button type="button" class="btn btn-sm" data-ng-click="reset()">Forgotten Password?</button>
+                                </div>
+                                <button type="submit" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
+                                <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="">
-                        <button type="button" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
-                        <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
-                    </div>
-                </form>
+                </div>
             </div>
-            <div id="registerBox" class="well hide">
-                <div id="registerAlert"></div>
-                <form name="frmReg">
-                    <label for="Name">Username:</label>
-                    <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
-                    <label for="Pass">Password:</label>
-                    <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
-                    <label for="Email">Email:</label>
-                    <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
-                    <br/>
-                    <div class="">
-                        <button type="button" class="btn btn-primary" type="registerSubmit()">Register</button>
-                        <button type="button" class="btn btn-default" data-ng-click="registerCancel()">Cancel</button>
+            <div id="registerBox" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-ng-click="registerCancel()">&times;</button>
+                            <h4 class="modal-title">Register Account</h4>
+                        </div>
+                        <form name="register">
+                            <div class="modal-body">
+                                <div id="registerAlert"></div>
+                                <label for="Name">Username:</label>
+                                <input type="text" id="user" name="user" class="form-control" data-ng-model="user.username"/>
+                                <label for="Pass">Password:</label>
+                                <input type="password" id="pass" name="pass" class="form-control" data-ng-model="user.password"/>
+                                <label for="Email">Email:</label>
+                                <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" data-ng-click="registerSubmit()">Register</button>
+                                <button type="button" class="btn btn-default" data-ng-click="registerCancel()">Cancel</button>
+                            </div>
+                        </form>
                     </div>
+                </div>
             </div>
-            <div id="resetBox" class="well hide">
-                <div id="resetAlert"></div>
-                <form name="frmReset">
-                    <label for="Email">Registered Email:</label>
-                    <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
-                    <br/>
-                    <div class="">
-                        <button type="button" class="btn btn-primary" type="resetSubmit()">Reset Password</button>
-                        <button type="button" class="btn btn-default" data-ng-click="resetCancel()">Cancel</button>
+            <div id="resetBox" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-ng-click="resetCancel()">&times;</button>
+                            <h4 class="modal-title">Reset Password</h4>
+                        </div>
+                        <form name="reset">
+                            <div class="modal-body">
+                                <div id="resetAlert"></div>
+
+                                <label for="Email">Registered Email:</label>
+                                <input type="email" id="Email" name="email" class="form-control" data-ng-model="user.email"/>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" data-ng-click="resetSubmit()">Reset Password</button>
+                                <button type="button" class="btn btn-default" data-ng-click="resetCancel()">Cancel</button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
         <div>
@@ -196,32 +254,16 @@ if (!isset($_SESSION['loggedin'])) {
                 </div>
             </div>
         </div>
-        <div class="container">
+        <div class="container main-div">
             <div data-ng-view>
                 <p>Broken view controller</p>
             </div>
         </div>
-        <div class="container">
-            <div class="content">
-                <div class="page hide" id="find" data-button-id="butFind">
-                    <form>
-                        <input type="hidden" name="Cmd" value="search" />
-                        <label>List all public recipes</label>
-                        <input type="hidden" name="Public" value="1" />
-                        <input type="submit" id="find" value="find"/>
-                    </form>
-                    <form>
-                        <input type="hidden" name="Cmd" value="search" />
-                        <label>List all my recipes</label>
-                        <input type="submit" id="find" value="find"/>
-                    </form>
-                    <form>
-                        <input type="hidden" name="Cmd" value="search" />
-                        <label>Search by tags:</label>
-                        <input type="text" id="Tags" name="Tags" />
-                        <input type="submit" value="find"/>
-                    </form>
-                </div>
+        <div class="footer">
+            <div class="container">
+                <p><b>Gluon Recipe</b></p>
+                <p>Client side built using <a href="http://angularjs.org/">AngularJS</a>, <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://jquery.com/">JQuery</a>.</p>
+                <p>Backend build using <a href="http://www.mysql.com/">MySQL</a> and <a href="http://php.net/">PHP</a>.</p>
             </div>
         </div>
     </body>
