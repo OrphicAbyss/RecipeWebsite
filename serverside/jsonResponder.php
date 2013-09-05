@@ -253,7 +253,7 @@ if ($_SESSION['loggedin']) {
             $user = new User();
             $user->Name = mysql_real_escape_string($postData['username'], getConnection());
             $user->Salt = mysql_real_escape_string(sha1(time()), getConnection());
-            $user->Hash = mysql_real_escape_string(sha1($postData['password'] . $user->Salt), getConnection());
+            $user->Pass = mysql_real_escape_string(sha1($postData['password'] . $user->Salt), getConnection());
             $user->Email = mysql_real_escape_string($postData['email'], getConnection());
             $user->Confirmation = mysql_real_escape_string(uniqid(), getConnection());
 
@@ -261,7 +261,7 @@ if ($_SESSION['loggedin']) {
             $data = array();
             if ($existingUser == null) {
                 //send email for user to confirm email address
-                mail($_POST['Email'], "Recipe Note: Registration Confirmation", "Thank you for registering with Recipe Note. To Complete the registration process click on the link below or copy and paste it into a new browser window:\n\n" .
+                mail($postData['email'], "Recipe Note: Registration Confirmation", "Thank you for registering with Recipe Note. To Complete the registration process click on the link below or copy and paste it into a new browser window:\n\n" .
                         "http://www.gluonporridge.net/recipe/#confirm?username=$user->Name&confirm=$user->Confirmation\n\nIf you didn't register with Recipe Note recently please ignore this email.", "From: RecipeNote@gluonporridge.net");
 
                 $user->save();
@@ -272,6 +272,25 @@ if ($_SESSION['loggedin']) {
             } else {
                 $data['error'] = true;
                 $data['message'] = "Username may already be in use.";
+            }
+            echo json_encode($data);
+            return;
+            
+        case 'confirm':
+            $name = mysql_real_escape_string($postData['username'], getConnection());
+            $confirm = mysql_real_escape_string($postData['confirm'], getConnection());
+
+            $data = array();
+            $user = User::findByName($name);
+            if (strcmp($user->Confirmation, $confirm) == 0) {
+                $user->Confirmation = "";
+                $user->save();
+                
+                $data['error'] = false;
+                $data['message'] = "Confirmation complete.\n\n You can now log in using the details you registered with.";
+            } else {
+                $data['error'] = true;
+                $data['message'] = "Invalid confirmation details, the Username may already be confirmed or confirmation details incorrect.\n\n If you have copied and pasted the URL ensure that the address is correct and matches the address sent in the email to you.";
             }
             echo json_encode($data);
             return;

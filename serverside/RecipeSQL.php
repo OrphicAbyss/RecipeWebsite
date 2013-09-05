@@ -592,12 +592,17 @@ class User extends DBRecord {
     }
 
     public function insert() {
-        
+        $sql = "INSERT User (Name, Pass, Salt, Confirmation, Email, Admin) " .
+                "VALUES('$this->Name', '$this->Pass', '$this->Salt', '$this->Confirmation', '$this->Email', '$this->Admin')";
+        $result = runQuery($sql);
+        $this->ID = mysql_insert_id();
     }
 
+
+    
     public function update() {
         $sql = "UPDATE User " .
-                "SET Pass='$this->Pass', Salt='$this->Salt' " .
+                "SET Pass='$this->Pass', Salt='$this->Salt', Confirmation='$this->Confirmation' " .
                 "WHERE ID=" . $this->ID;
         runQuery($sql);
     }

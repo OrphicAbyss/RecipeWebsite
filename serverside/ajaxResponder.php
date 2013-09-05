@@ -41,19 +41,7 @@ switch ($_POST['Cmd']) {
 // If we aren't logged in we can: Login, Register, Reset Password or Confirm an account
 if ($_SESSION['loggedin'] != true) {
     switch ($_POST['Cmd']) {
-        case 'Confirm':
-            $name = mysql_real_escape_string($_POST['username'], getConnection());
-            $confirm = mysql_real_escape_string($_POST['confirm'], getConnection());
 
-            $user = User::findByName($name);
-            if (strcmp($user->Confirmation, $confirm) == 0) {
-                $user->Confirmation = "";
-                $user->save();
-                $returnMsg->returnMessage("Confirmation complete.\n\n You can now log in using the details you registered with.");
-            } else {
-                $returnMsg->returnError("Invalid confirmation details, the Username may already be confirmed or confirmation details incorrect.\n\n If you have copied and pasted the URL ensure that the address is correct and matches the address sent in the email to you.");
-            }
-            break;
 
         default:
             //Users session may have timed out refresh their browser page

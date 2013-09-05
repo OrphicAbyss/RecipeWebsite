@@ -8,7 +8,7 @@ recipe = angular.module('recipe', []).
                 when('/edit/:recipeId', {templateUrl: 'client/edit.html', controller: EditCtrl}).
                 when('/profile/', {templateUrl: 'client/profile.html', controller: ProfileCtrl}).
                 when('/confirm/', {templateUrl: 'client/list.html', controller: ConfirmCtrl}).
-        otherwise({redirectTo: '/'});
+                otherwise({redirectTo: '/'});
     }]).
         run(function($rootScope, $templateCache) {
     $rootScope.$on('$viewContentLoaded', function() {
@@ -18,12 +18,14 @@ recipe = angular.module('recipe', []).
 
 recipe.factory('$dialog', function() {
     return {
-        open: function(title, message) {
+        open: function(title, message, callback) {
             angular.element("#myModal .modal-title").html(title);
             angular.element("#myModal div.modal-body").html(message);
-//            angular.element('#myModal').on('hide.bs.modal', function() {
-//                $route.reload();
-//            });
+            if (callback !== undefined) {
+                angular.element('#myModal').on('hidden.bs.modal', function(e) {
+                    callback();
+                });
+            }
             angular.element("#myModal").modal();
         }
     };
@@ -55,6 +57,9 @@ recipe.factory('$recipeServer', function($http) {
         },
         register: function(username, password, email, callback) {
             callServer({cmd: 'register', username: username, password: password, email: email}, callback);
+        },
+        confirm: function(username, confirm, callback) {
+            callServer({cmd: 'confirm', username: username, confirm: confirm}, callback);
         },
         logout: function(callback) {
             callServer({cmd: 'logout'}, function(data) {
@@ -266,8 +271,25 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
     };
 }
 
-function ConfirmCtrl($scope, $route) {
-    alert("confirm");
+function ConfirmCtrl($scope, $route, $recipeServer, $location, $dialog) {
+    var user = $route.current.params.username;
+    var hash = $route.current.params.confirm;
+
+    var callback = function() {
+        $location.path("/");
+        $location.search("username", null);
+        $location.search("confirm", null);
+        $scope.$apply();
+    }
+
+    $recipeServer.confirm(user, hash, function(data) {
+        data.message = data.message.split("\n").join("<br/>");
+        if (data.error == false) {
+            $dialog.open("Success", data.message, callback);
+        } else {
+            $dialog.open("Error", data.message, callback);
+        }
+    });
 }
 
 function ListCtrl($scope, $recipeServer, $routeParams, $location) {
