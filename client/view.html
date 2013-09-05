@@ -1,7 +1,7 @@
 <div>
     <h1 style='float: left'>
         {{recipe.Title}}
-        <img src='icons/{{recipe.Visibility.toLowerCase()}}.png' alt='{{recipe.Visibility}}' style='padding-left: 0.5em'/>
+        <img data-ng-src='icons/{{recipe.Visibility.toLowerCase()}}.png' style='padding-left: 0.5em'/>
     </h1>
     <div style='float: right'>
         <div class="pull-right" style='margin-bottom: 1em;'>
@@ -16,29 +16,29 @@
                 <li><button data-ng-show="recipe.Cmds.image" class="btn btn-default">Manage Images</button></li>
             </ul>
         </div>
-        <img data-ng-repeat="image in recipe.Images" style='width: 200px; margin-bottom: 1em; float: right; clear: right; border: 1px solid black' src='images/{{image.FilenameServer}}'/>
+        <img data-ng-repeat="image in recipe.Images" style='width: 200px; margin-bottom: 1em; float: right; clear: right; border: 1px solid black' data-ng-src='images/{{image.FilenameServer}}'/>
     </div>
     <div style='clear: left'></div>
     <div>
         <h4>Author <small>{{recipe.Author}}</small></h4>
     </div>
-    <div>
+    <div data-ng-show="recipe.Description.length > 1 || recipe.Description[0] !== ''">
         <h2>Description</h2>
-        <p data-ng-repeat="line in recipe.Description">{{line}}</p>
+        <p data-ng-repeat="list in recipe.Description track by $index">{{list}}</p>
     </div>
     <div>
         <h2>Ingredients</h2>
         <ul>
-            <li data-ng-repeat="line in recipe.Ingredients">{{line}}</li>
+            <li data-ng-repeat="list in recipe.Ingredients track by $index">{{list}}</li>
         </ul>
     </div>
     <div>
         <h2>Method</h2>
-        <p data-ng-repeat="line in recipe.Method">{{line}}</p>
+        <p data-ng-repeat="list in recipe.Method track by $index">{{list}}</p>
     </div>
-    <div>
+    <div data-ng-show="recipe.Notes.length > 1 || recipe.Notes[0] !== ''">
         <h2>Notes</h2>
-        <p data-ng-repeat="line in recipe.Notes">{{line}}</p>
+        <p data-ng-repeat="list in recipe.Notes track by $index">{{list}}</p>
     </div>
     <div>
         <h2>Source</h2>

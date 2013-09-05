@@ -109,6 +109,33 @@ if (!isset($_SESSION['loggedin'])) {
                     display: none;
                 }
             }
+
+            .animate-enter {
+                -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
+                -moz-animation: enter_sequence 1s linear; /* Firefox */
+                -o-animation: enter_sequence 1s linear; /* Opera */
+                animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+            }
+            
+            @-webkit-keyframes enter_sequence {
+                from { opacity:0; }
+                to { opacity:1; }
+            }
+            
+            @-moz-keyframes enter_sequence {
+                from { opacity:0; }
+                to { opacity:1; }
+            }
+            
+            @-o-keyframes enter_sequence {
+                from { opacity:0; }
+                to { opacity:1; }
+            }
+            
+            @keyframes enter_sequence {
+                from { opacity:0; }
+                to { opacity:1; }
+            }
         </style>
         <script type="text/javascript">
 //            $(document).ready(function() {
@@ -126,8 +153,8 @@ if (!isset($_SESSION['loggedin'])) {
         <!-- Optional theme -->
         <!--<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">-->
         <!-- Latest compiled and minified JavaScript -->
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.js"></script>
         <script src="client/controller.js"></script>
     </head>
@@ -177,8 +204,8 @@ if (!isset($_SESSION['loggedin'])) {
                             </div>
                             <div class="modal-footer">
                                 <div class="pull-left">
-                                    <button type="button" class="btn btn-sm" data-ng-click="register()">Not registered?</button>
-                                    <button type="button" class="btn btn-sm" data-ng-click="reset()">Forgotten Password?</button>
+                                    <button type="button" class="btn btn-sm" data-ng-click="registerClick()">Not registered?</button>
+                                    <button type="button" class="btn btn-sm" data-ng-click="resetClick()">Forgotten Password?</button>
                                 </div>
                                 <button type="submit" class="btn btn-primary" data-ng-click="signinSubmit()">Sign in</button>
                                 <button type="button" class="btn btn-default" data-ng-click="signinCancel()">Cancel</button>
@@ -255,7 +282,7 @@ if (!isset($_SESSION['loggedin'])) {
             </div>
         </div>
         <div class="container main-div">
-            <div data-ng-view>
+            <div data-ng-view data-ng-animate="{enter: 'animate-enter'}">
                 <p>Broken view controller</p>
             </div>
         </div>

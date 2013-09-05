@@ -2,12 +2,13 @@ recipe = angular.module('recipe', []).
         config(['$routeProvider', function($routeProvider) {
         $routeProvider.
                 when('/', {templateUrl: 'client/list.html', controller: ListCtrl}).
-                when('/search/', {templateUrl: 'client/list.html', controller: ListCtrl, reloadOnSearch: true}).
+                when('/search/', {templateUrl: 'client/list.html', controller: ListCtrl, reloadOnSearch: false}).
                 when('/view/:recipeId', {templateUrl: 'client/view.html', controller: ViewCtrl}).
                 when('/add/', {templateUrl: 'client/edit.html', controller: AddCtrl}).
                 when('/edit/:recipeId', {templateUrl: 'client/edit.html', controller: EditCtrl}).
-                when('/profile/', {templateUrl: 'client/profile.html', controller: ProfileCtrl});
-        //otherwise({redirectTo: '/phones'});
+                when('/profile/', {templateUrl: 'client/profile.html', controller: ProfileCtrl}).
+                when('/confirm/', {templateUrl: 'client/list.html', controller: ConfirmCtrl}).
+        otherwise({redirectTo: '/'});
     }]).
         run(function($rootScope, $templateCache) {
     $rootScope.$on('$viewContentLoaded', function() {
@@ -193,13 +194,12 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
 
     $scope.signinCancel = function() {
         angular.element("#loginBox").modal('hide');
-        //$scope.user = {};
     };
 
-    $scope.register = function() {
-        $('#loginBox').on('hidden.bs.modal', function(e) {
+    $scope.registerClick = function() {
+        angular.element('#loginBox').on('hidden.bs.modal', function(e) {
             angular.element("#registerBox").modal();
-            $('#loginBox').off('hidden.bs.modal');
+            angular.element('#loginBox').off('hidden.bs.modal');
         });
         angular.element("#loginBox").modal('hide');
     };
@@ -220,7 +220,7 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
         } else {
             $recipeServer.register($scope.user.username, $scope.user.password, $scope.user.email, function(data) {
                 if (data.error == false) {
-                    $('#registerBox').on('hidden.bs.modal', function(e) {
+                    angular.element('#registerBox').on('hidden.bs.modal', function(e) {
                         $dialog.open("Registerd", data.message);
                     });
                     angular.element("#registerBox").modal("hide");
@@ -236,10 +236,10 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
         angular.element("#registerBox").modal("hide");
     };
 
-    $scope.reset = function() {
-        $('#loginBox').on('hidden.bs.modal', function(e) {
+    $scope.resetClick = function() {
+        angular.element('#loginBox').on('hidden.bs.modal', function(e) {
             angular.element("#resetBox").modal();
-            $('#loginBox').off('hidden.bs.modal');
+            angular.element('#loginBox').off('hidden.bs.modal');
         });
         angular.element("#loginBox").modal("hide");
 
@@ -249,9 +249,9 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
         angular.element('#resetAlert').html('');
         $recipeServer.reset($scope.user.email, function(data) {
             if (data.error == false) {
-                $('#resetBox').on('hidden.bs.modal', function(e) {
+                angular.element('#resetBox').on('hidden.bs.modal', function(e) {
                     $dialog.open("Password reset", data.message);
-                    $('#resetBox').off('hidden.bs.modal');
+                    angular.element('#resetBox').off('hidden.bs.modal');
                 });
                 angular.element("#resetBox").modal("hide");
                 //$route.reload();
@@ -266,37 +266,8 @@ function PageCtrl($scope, $route, $recipeServer, $dialog, $templateCache) {
     };
 }
 
-function LoginCtrl($scope, $recipeServer, $route) {
-    $scope.signinSubmit = function() {
-        if ($scope.user.username === undefined)
-            $scope.user.username = angular.element('#user').val();
-        if ($scope.user.password === undefined)
-            $scope.user.password = angular.element('#pass').val();
-
-        angular.element('#loginAlert').html('');
-
-        if ($scope.user.username == undefined ||
-                $scope.user.username == "" ||
-                $scope.user.password == undefined ||
-                $scope.user.password == "") {
-            angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>Enter both a username and password.</span></div>');
-        } else {
-            $recipeServer.login($scope.user.username, $scope.user.password, function(data) {
-                if (data.loggedIn == true) {
-                    $scope.loggedIn = true;
-                    angular.element("#loginBox").addClass("hide");
-                    $route.reload();
-                } else {
-                    angular.element('#loginAlert').html('<div class="alert alert-danger"><a class="close" data-dismiss="alert">&times;</a><span>' + data.message + '</span></div>');
-                }
-            });
-        }
-    };
-
-    $scope.signinCancel = function() {
-        angular.element("#loginBox").addClass("hide");
-        $scope.user = {};
-    };
+function ConfirmCtrl($scope, $route) {
+    alert("confirm");
 }
 
 function ListCtrl($scope, $recipeServer, $routeParams, $location) {
@@ -312,6 +283,7 @@ function ListCtrl($scope, $recipeServer, $routeParams, $location) {
 
     $scope.tagSearch = function(tag) {
         $location.search("search=" + tag);
+        $scope.search = tag;
     };
 
     $scope.clearSearch = function(tag) {
@@ -329,7 +301,6 @@ function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
             function(recipe) {
                 $scope.recipe = recipe;
                 $scope.recipe.Visibility = $scope.recipe.Visibility.split(" ").join("");
-                $scope.recipe.Title = $scope.recipe.Title.split("\n").join("<br/>");
                 $scope.recipe.Description = $scope.recipe.Description.split("\n");
                 $scope.recipe.Ingredients = $scope.recipe.Ingredients.split("\n");
                 $scope.recipe.Method = $scope.recipe.Method.split("\n");
