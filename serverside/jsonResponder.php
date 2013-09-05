@@ -174,11 +174,6 @@ if ($_SESSION['loggedin']) {
             $recipeToSave->AuthorID = $_SESSION['userid'];
             $recipeToSave->save();
 
-            // easiest way to update tags is to delete the current ones in the database for the recipe and re-insert the ones on the form
-            $sql = "DELETE FROM RecipeTags WHERE RecipeID = $recipeToSave->ID";
-            // Delete all the old tag links before we insert the new ones
-            $result = runQuery($sql);
-
             //deal with tags
             $tags = explode(",", $postData['Tags']);
             $recipeToSave->replaceTags($tags);

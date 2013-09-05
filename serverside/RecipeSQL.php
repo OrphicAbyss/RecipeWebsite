@@ -235,7 +235,7 @@ class Tag extends DBRecord {
                 "AND RecipeTags.TagID = Tags.ID";
         return mysqlHelper::get_mysql_obj_array($getTagSql, 'Tag');
     }
-
+    
     public function insert() {
         if ($this->ID != null) {
             die("Trying to insert tag which already has ID\nID: $this->ID Tag: $this->Tag\n");
@@ -461,6 +461,10 @@ class Recipe extends DBRecord {
      * @param Array $newTags An array of tags to mark against the recipe
      */
     public function replaceTags($newTags) {
+        // delete all previous tags.
+        $sql = "DELETE FROM RecipeTags WHERE RecipeID = $this->ID";
+        $result = runQuery($sql);
+        
         // start of tag insert sql
         $tagInsertSql = "INSERT INTO RecipeTags(RecipeId,TagId) VALUES";
 
