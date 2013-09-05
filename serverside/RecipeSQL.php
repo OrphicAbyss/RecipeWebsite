@@ -371,6 +371,17 @@ class Recipe extends DBRecord {
         return mysqlHelper::get_mysql_obj_array($sql, 'Recipe');
     }
 
+        /**
+     * Find all of the recipes by a perticular author
+     * 
+     * @param int $UserID The Id of the author to find the recipes of
+     * @return Recipe[] all recipes by the provided author id
+     */
+    public static function findAllWithUserAndPublic($UserID) {
+        $sql = "SELECT * FROM Recipe WHERE Deleted=false AND (AuthorID = " . $UserID . " OR Visibility = 2)";
+        return mysqlHelper::get_mysql_obj_array($sql, 'Recipe');
+    }
+    
     /**
      * Return's all recipe records in the database with the restriction sql statements added to
      * limit the results

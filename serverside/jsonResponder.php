@@ -29,14 +29,12 @@ switch ($postData['cmd']) {
         if ((isset($postData['All']) || isset($postData['Deleted'])) && $_SESSION['isadmin']) {
             //All or Deleted records are returned
             $recipes = isset($postData['All']) ? Recipe::findAll() : Recipe::findAllDeleted();
-        } else if (isset($postData['Public']) || !isset($_SESSION['userid']) || $_SESSION['userid'] == "") {
+        } else if (!isset($_SESSION['userid']) || $_SESSION['userid'] == "") {
             //All public records are returned
             $recipes = Recipe::findAllPublic();
-            $return['Type'] = "Public";
         } else {
             //All of the current users records returned
-            $recipes = Recipe::findAllWithUser($_SESSION['userid']);
-            $return['Type'] = "Private";
+            $recipes = Recipe::findAllWithUserAndPublic($_SESSION['userid']);
         }
 
         if ($recipes != null) {
