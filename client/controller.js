@@ -23,6 +23,7 @@ recipe.factory('$dialog', function() {
             angular.element("#myModal div.modal-body").html(message);
             if (callback !== undefined) {
                 angular.element('#myModal').on('hidden.bs.modal', function(e) {
+                    angular.element('#myModal').off('hidden.bs.modal');
                     callback();
                 });
             }
@@ -314,7 +315,7 @@ function ListCtrl($scope, $recipeServer, $routeParams, $location) {
     };
 }
 
-function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
+function ViewCtrl($scope, $recipeServer, $routeParams, $location, $dialog) {
     angular.element("#nav-bar-menu li").removeClass("active");
     $scope.recipeId = $routeParams.recipeId;
     $scope.recipe = {};
@@ -330,10 +331,10 @@ function ViewCtrl($scope, $recipeServer, $routeParams, $location) {
                 // TODO: check for controls
             },
             function(message) {
-                $dialog.open("Error", message);
-//                angular.element('#myModal').on('hide.bs.modal', function() {
-//                    $location.path("/");
-//                });
+                $dialog.open("Error", message, function() {
+                    $location.path("/");
+                    $scope.$apply();
+                });
             });
     $scope.tagSearch = function(tag) {
         $location.path("/search/").search("search=" + tag);
@@ -366,7 +367,7 @@ function AddCtrl($scope, $recipeServer, $location) {
     };
 }
 
-function EditCtrl($scope, $recipeServer, $routeParams, $location) {
+function EditCtrl($scope, $recipeServer, $routeParams, $location, $dialog) {
     angular.element("#nav-bar-menu li").removeClass("active");
     $scope.recipeId = $routeParams.recipeId;
     $scope.recipe = {};
@@ -383,10 +384,10 @@ function EditCtrl($scope, $recipeServer, $routeParams, $location) {
                 $scope.recipe = recipe;
             },
             function(message) {
-                $dialog.open("Error", message);
-//                angular.element('#myModal').on('hide.bs.modal', function() {
-//                    $location.path("/");
-//                });
+                $dialog.open("Error", message, function() {
+                    $location.path("/");
+                    $scope.$apply();
+                });
             });
     $scope.save = function() {
         $scope.ID = $scope.recipeID;

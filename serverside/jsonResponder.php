@@ -160,17 +160,17 @@ if ($_SESSION['loggedin']) {
 
             $recipeData = $postData['recipe'];
             // If we are aren't a new recipe (pre-populate the object)
-            if ($postData['ID'] != "") {
-                $recipeToSave = Recipe::find(mysql_real_escape_string($recipeData->ID, getConnection()));
+            if ($recipeData['ID'] != "") {
+                $recipeToSave = Recipe::find(mysql_real_escape_string($recipeData['ID'], getConnection()));
             }
 
-            $recipeToSave->Title = mysql_real_escape_string($recipeData->Title, getConnection());
-            $recipeToSave->Description = mysql_real_escape_string($recipeData->Description, getConnection());
-            $recipeToSave->Ingredients = mysql_real_escape_string($recipeData->Ingredients, getConnection());
-            $recipeToSave->Method = mysql_real_escape_string($recipeData->Method, getConnection());
-            $recipeToSave->Notes = mysql_real_escape_string($recipeData->Notes, getConnection());
-            $recipeToSave->Source = mysql_real_escape_string($recipeData->Source, getConnection());
-            $recipeToSave->Visibility = mysql_real_escape_string($recipeData->Visibility, getConnection());
+            $recipeToSave->Title = mysql_real_escape_string($recipeData['Title'], getConnection());
+            $recipeToSave->Description = mysql_real_escape_string($recipeData['Description'], getConnection());
+            $recipeToSave->Ingredients = mysql_real_escape_string($recipeData['Ingredients'], getConnection());
+            $recipeToSave->Method = mysql_real_escape_string($recipeData['Method'], getConnection());
+            $recipeToSave->Notes = mysql_real_escape_string($recipeData['Notes'], getConnection());
+            $recipeToSave->Source = mysql_real_escape_string($recipeData['Source'], getConnection());
+            $recipeToSave->Visibility = mysql_real_escape_string($recipeData['Visibility'], getConnection());
             $recipeToSave->AuthorID = $_SESSION['userid'];
             $recipeToSave->save();
 
