@@ -206,7 +206,8 @@ if ($_SESSION['loggedin']) {
 
                         $data['message'] = "";
                     } else {
-//                        $data['message'] = "Password incorrect";
+                        if (config::$debug == true)
+                            $data['message'] = "Password incorrect";
                     }
                 }
             }
@@ -231,7 +232,9 @@ if ($_SESSION['loggedin']) {
                 $user->Pass = mysql_real_escape_string($user->hashPass($pass), getConnection());
 
                 // Email the user to let them know their new password
-                mail($email, "Recipe Note: Password Reset", "Your password has been reset as per your request on Recipe Note.\n\n Your new password is: $pass\n\n Log into Recipe note at: http://www.gluonporridge.net/recipetest/ and change your password after logging in with your new password.", "From: RecipeNote@gluonporridge.net");
+                mail($email, 
+                        "Recipe Note: Password Reset",
+                        "Your password has been reset as per your request on Recipe Note.\n\n Your new password is: $pass\n\n Log into Recipe note at: " . config::$siteURL . " and change your password after logging in with your new password.", "From: RecipeNote@gluonporridge.net");
 
                 $user->save();
 
@@ -255,7 +258,7 @@ if ($_SESSION['loggedin']) {
             if ($existingUser == null) {
                 //send email for user to confirm email address
                 mail($postData['email'], "Recipe Note: Registration Confirmation", "Thank you for registering with Recipe Note. To Complete the registration process click on the link below or copy and paste it into a new browser window:\n\n" .
-                        "http://www.gluonporridge.net/recipe/#confirm?username=$user->Name&confirm=$user->Confirmation\n\nIf you didn't register with Recipe Note recently please ignore this email.", "From: RecipeNote@gluonporridge.net");
+                        config::$siteURL . "#confirm?username=$user->Name&confirm=$user->Confirmation\n\nIf you didn't register with Recipe Note recently please ignore this email.", "From: RecipeNote@gluonporridge.net");
 
                 $user->save();
 
@@ -290,5 +293,5 @@ if ($_SESSION['loggedin']) {
     }
 }
 
-echo '{"error": "Unknown cmd: ' . $postData['cmd'] . '"}';
+echo '{"error": true, "message": "Unknown cmd: ' . $postData['cmd'] . '"}';
 ?>
