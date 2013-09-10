@@ -26,9 +26,10 @@ switch ($postData['cmd']) {
         $return = array();
         $recipes = null;
 
-        if ((isset($postData['All']) || isset($postData['Deleted'])) && $_SESSION['isadmin']) {
+        if ($_SESSION['isadmin']) { //(isset($postData['All']) || isset($postData['Deleted'])) && $_SESSION['isadmin']) {
             //All or Deleted records are returned
-            $recipes = isset($postData['All']) ? Recipe::findAll() : Recipe::findAllDeleted();
+            //$recipes = isset($postData['All']) ? Recipe::findAll() : Recipe::findAllDeleted();
+            $recipes = Recipe::findAll();
         } else if (!isset($_SESSION['userid']) || $_SESSION['userid'] == "") {
             //All public records are returned
             $recipes = Recipe::findAllPublic();

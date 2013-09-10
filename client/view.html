@@ -1,4 +1,4 @@
-<div>
+<div data-ng-show='recipe.ID != undefined' data-ng-animate="{show: 'animate-enter'}">
     <h1 style='float: left'>
         {{recipe.Title}}
         <img data-ng-src='icons/{{recipe.Visibility.toLowerCase()}}.png' style='padding-left: 0.5em'/>

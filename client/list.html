@@ -1,4 +1,4 @@
-<div>
+<div data-ng-show='recipes.length != 0' data-ng-animate="{show: 'animate-enter'}">
     <div class="col-md-7"></div>
     <div class="col-md-5 no-side-padding">
         <div class="input-group">
@@ -34,4 +34,9 @@
             </tr>
         </tbody>
     </table>
+</div>
+<div data-ng-show='recipes.length == 0'>
+    <div class='jumbotron'>
+        Loading...
+    </div>
 </div>

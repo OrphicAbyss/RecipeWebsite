@@ -18,7 +18,7 @@ if (!isset($_SESSION['loggedin'])) {
 <!--        <script type="text/javascript" src="ajaxfileupload.js"></script>-->
 
         <!-- Piwik -->
-        <script type="text/javascript" src="../piwik/piwik.js"></script>
+        <script type="text/javascript" src="//gluonporridge.net/piwik/piwik.js"></script>
         <script type="text/javascript">
             var pkBaseURL = (("https:" == document.location.protocol) ? "https://www.gluonporridge.net/piwik/" : "http://www.gluonporridge.net/piwik/");
             try {
@@ -111,10 +111,10 @@ if (!isset($_SESSION['loggedin'])) {
             }
 
             .animate-enter {
-                -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
-                -moz-animation: enter_sequence 1s linear; /* Firefox */
-                -o-animation: enter_sequence 1s linear; /* Opera */
-                animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+                -webkit-animation: enter_sequence 0.5s linear; /* Safari/Chrome */
+                -moz-animation: enter_sequence 0.5s linear; /* Firefox */
+                -o-animation: enter_sequence 0.5s linear; /* Opera */
+                animation: enter_sequence 0.5s linear; /* IE10+ and Future Browsers */
             }
             
             @-webkit-keyframes enter_sequence {
@@ -136,17 +136,34 @@ if (!isset($_SESSION['loggedin'])) {
                 from { opacity:0; }
                 to { opacity:1; }
             }
+            
+            .animate-exit {
+                -webkit-animation: exit_sequence 0.5s linear; /* Safari/Chrome */
+                -moz-animation: exit_sequence 0.5s linear; /* Firefox */
+                -o-animation: exit_sequence 0.5s linear; /* Opera */
+                animation: exit_sequence 0.5s linear; /* IE10+ and Future Browsers */
+            }
+            
+            @-webkit-keyframes exit_sequence {
+                from { opacity:1; }
+                to { opacity:0; }
+            }
+            
+            @-moz-keyframes exit_sequence {
+                from { opacity:1; }
+                to { opacity:0; }
+            }
+            
+            @-o-keyframes exit_sequence {
+                from { opacity:1; }
+                to { opacity:0; }
+            }
+            
+            @keyframes exit_sequence {
+                from { opacity:1; }
+                to { opacity:0; }
+            }
         </style>
-        <script type="text/javascript">
-//            $(document).ready(function() {
-//                window.onhashchange = function() {
-//                    //track in piwik
-//                    piwikTracker.setCustomUrl(window.location.href);
-//                    piwikTracker.setDocumentTitle(document.title);
-//                    piwikTracker.trackPageView();
-//                };
-//            }
-        </script>
 
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
@@ -157,6 +174,18 @@ if (!isset($_SESSION['loggedin'])) {
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.js"></script>
         <script src="client/controller.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.onhashchange = function() {
+                    //track in piwik
+                    piwikTracker.discardHashTag(false);
+                    piwikTracker.setCustomUrl(window.location.href);
+                    piwikTracker.setDocumentTitle(document.title);
+                    piwikTracker.trackPageView();
+                };
+            });
+        </script>
     </head>
     <body data-ng-controller="PageCtrl">
         <div class="navbar navbar-default">
@@ -282,7 +311,7 @@ if (!isset($_SESSION['loggedin'])) {
             </div>
         </div>
         <div class="container main-div">
-            <div data-ng-view data-ng-animate="{enter: 'animate-enter'}">
+            <div data-ng-view data-ng-animate="{enter: 'animate-enter', leave: 'animate-exit'}">
                 <p>Broken view controller</p>
             </div>
         </div>
