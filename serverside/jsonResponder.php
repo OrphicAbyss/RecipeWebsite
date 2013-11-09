@@ -16,10 +16,11 @@ $postData = json_decode(file_get_contents('php://input'), true);
 
 switch ($postData['cmd']) {
     case 'amLoggedIn':
-        if ($_SESSION['loggedin'])
+        if ($_SESSION['loggedin']) {
             echo '{"loggedIn": true}';
-        else
+        } else {
             echo '{"loggedIn": false}';
+        }
         return;
 
     case 'list':
@@ -156,6 +157,17 @@ if ($_SESSION['loggedin']) {
             echo json_encode($data);
             return;
             
+        case 'delete':
+            $ID = mysql_real_escape_string($postData['id'], getConnection());
+            
+            $recipe = Recipe::find($ID);
+            $recipe->delete();
+            
+            $data = array();
+            $data['error'] = false;
+            echo json_encode($data);
+            return;
+            
         case 'save':
             $recipeToSave = new Recipe();
 
@@ -176,7 +188,7 @@ if ($_SESSION['loggedin']) {
             $recipeToSave->save();
 
             //deal with tags
-            $tags = explode(",", $postData['Tags']);
+            $tags = $recipeData['Tags'];
             $recipeToSave->replaceTags($tags);
             
             $data = array();

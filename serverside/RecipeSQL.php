@@ -533,6 +533,8 @@ class Recipe extends DBRecord {
      */
     public function delete() {
         // TODO: Delete recipe if record has been marked deleted and deleted linked data in other tables
+        $sql = "UPDATE Recipe SET Deleted=1";
+        runQuery($sql);
     }
 
 }

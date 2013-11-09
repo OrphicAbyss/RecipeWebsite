@@ -1,4 +1,10 @@
 <div data-ng-show='recipe.ID != undefined' data-ng-animate="{show: 'animate-enter'}">
+    <div class="well">
+        <h1>Delete</h1>
+        <p>Are you sure you want to delete the following recipe?</p>
+        <button class="btn btn-success" data-ng-click="yes()">Yes</button>
+        <button class="btn btn-danger" data-ng-click="no()">No</button>
+    </div>
     <h1 style='float: left'>
         {{recipe.Title}}
         <img data-ng-src='icons/{{recipe.Visibility.toLowerCase()}}.png' style='padding-left: 0.5em'/>
@@ -8,12 +14,6 @@
             <h2>Tags</h2>
             <ul class="list-unstyled">
                 <li data-ng-repeat="tag in recipe.Tags"><button data-ng-click="tagSearch(tag)" class="btn btn-default">{{tag}}</button></li>
-            </ul>
-            <h2 data-ng-show="recipe.Cmds.edit || recipe.Cmds.delete || recipe.Cmds.image">Commands</h2>
-            <ul class="list-unstyled">
-                <li><button data-ng-show="recipe.Cmds.edit" data-ng-click="edit()" class="btn btn-default">Edit</button></li>
-                <li><button data-ng-show="recipe.Cmds.delete" data-ng-click="delete()" class="btn btn-default">Delete</button></li>
-                <li><button data-ng-show="recipe.Cmds.image" class="btn btn-default">Manage Images</button></li>
             </ul>
         </div>
         <img data-ng-repeat="image in recipe.Images" style='width: 200px; margin-bottom: 1em; float: right; clear: right; border: 1px solid black' data-ng-src='images/{{image.FilenameServer}}'/>
@@ -45,12 +45,3 @@
         <div>{{recipe.Source}}</div>
     </div>
 </div>
-<!--   if ((drillDownCmds != undefined && drillDownId != undefined) && drillDownCmds.length > 0) {
-        html += "<div style='padding-top: 2em'><h2 class='header-cell'>Actions</h2><div class='data-cell'>";
-        for (var drillDownKey in drillDownCmds) {
-            html += '<div class="link" data-cmd="Cmd=' + drillDownCmds[drillDownKey]['cmd'] + '&ID=' + drillDownId + '">' + drillDownCmds[drillDownKey]['text'] + '</div>';
-        }
-        html += "</div></div>"
-    }
-    html += '<div style="clear: right"></div>'
-    return html;-->
